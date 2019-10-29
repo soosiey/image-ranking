@@ -29,7 +29,6 @@ optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
 data = Data(
-    no_epoch,
     batch_size,
     criterion,
     transform_train=transform_train,
@@ -37,8 +36,10 @@ data = Data(
 )
 
 
-if os.path("temp_{}_{}.model".format(model.name, start_epoch)):
-    model = torch.load("temp_{}_{}.model".format(model.name, start_epoch))
-    data.train(model, optimizer, start_epoch=start_epoch)
+if os.path("models/trained_models/temp_{}_{}.model".format(model.name, start_epoch)):
+    model = torch.load(
+        "models/trained_models/temp_{}_{}.model".format(model.name, start_epoch)
+    )
+    data.train(no_epoch, model, optimizer, start_epoch=start_epoch)
 else:
-    data.train(model, optimizer)
+    data.train(no_epoch, model, optimizer)

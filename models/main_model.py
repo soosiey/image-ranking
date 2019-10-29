@@ -1,5 +1,5 @@
-
 from torch import nn
+
 
 class GeneralModel(nn.Module):
     def __init__(self):

@@ -41,16 +41,15 @@ def create_val_folder(val_dir):
 class Data:
     def __init__(
         self,
-        no_epoch,
         batch_size,
-        optimizer,
         criterion,
+        scheduler=None,
         transform_train=None,
         transform_test=None,
     ):
-        self.no_epoch = no_epoch
         self.batch_size = batch_size
         self.criterion = criterion
+        self.scheduler = scheduler
 
         if transform_train is None:
             transform_train = [
@@ -82,7 +81,7 @@ class Data:
             val_dataset, batch_size=batch_size, shuffle=False, num_workers=8
         )
 
-    def train(self, model, optimizer, scheduler=None, start_epoch=0, should_save=True):
+    def train(self, model, optimizer, start_epoch=0, should_save=True):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         test_acc_list = []
@@ -111,8 +110,8 @@ class Data:
                     / float(self.batch_size)
                 ) * 100.0
                 train_accu.append(accuracy)
-            if scheduler is not None:
-                scheduler.step()
+            if self.scheduler is not None:
+                self.scheduler.step()
             train_acc = np.mean(train_accu)
 
             with torch.no_grad():
@@ -138,10 +137,20 @@ class Data:
             time_list.append(time.time() - start_time)
 
             if (epoch + 1) % 15 == 0 and should_save:
-                torch.save(model, "temp_{}_{}.model".format(model.name, epoch))
-                torch.save(optimizer, "temp_{}_{}.state".format(model.name, epoch))
+                torch.save(
+                    model,
+                    "models/trained_models/temp_{}_{}.model".format(model.name, epoch),
+                )
+                torch.save(
+                    optimizer,
+                    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
+                )
                 data = [train_acc_list, test_acc_list]
                 data = np.asarray(data)
-                np.save("temp_{}_{}.npy".format(model.name, epoch), data)
+                np.save(
+                    "models/trained_models/temp_{}_{}.npy".format(model.name, epoch),
+                    data,
+                )
         if should_save:
-            torch.save(model, "{}.model".format(model.name))
+            torch.save(model, "models/trained_models/{}.model".format(model.name))
+            np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
