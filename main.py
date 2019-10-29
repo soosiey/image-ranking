@@ -27,10 +27,13 @@ no_epoch = 200
 LR = 0.01
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size=10,gamma=0.5)
+
 
 data = Data(
     batch_size,
     criterion,
+    scheduler=scheduler,
     transform_train=transform_train,
     transform_test=transform_test,
 )
