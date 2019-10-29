@@ -9,7 +9,6 @@ from utils import Data
 
 from models.main_model import GeneralModel as Model
 
-batch_size = 100
 
 transform_test = [transforms.ToTensor()]
 
@@ -20,15 +19,15 @@ transform_train = [
 ]
 
 
-model = Model()
-
-start_epoch = 0
+# Hyperparamters
+batch_size = 100
 no_epoch = 200
 LR = 0.01
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size=10,gamma=0.5)
 
+model = Model()
 
 data = Data(
     batch_size,
@@ -39,6 +38,7 @@ data = Data(
 )
 
 
+start_epoch = 0 # Change me!
 if os.path("models/trained_models/temp_{}_{}.model".format(model.name, start_epoch)):
     model = torch.load(
         "models/trained_models/temp_{}_{}.model".format(model.name, start_epoch)
