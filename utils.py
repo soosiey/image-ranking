@@ -95,7 +95,7 @@ class TinyImage(Dataset):
         return len(self.all_images)
 
 
-class Model:
+class Data:
     def __init__(
         self,
         batch_size,
@@ -149,13 +149,11 @@ class Model:
         for epoch in range(start_epoch, self.no_epoch):
             model.train()
             train_accu = []
-            for batch_idx, (im1, im2, im3) in enumerate(
-                self.train_loader
-            ):
+            for batch_idx, (im1, im2, im3) in enumerate(self.train_loader):
                 im1, im2, im3 = (
                     Variable(im1).to(device),
                     Variable(im2).to(device),
-                    Variable(im3).to(device)
+                    Variable(im3).to(device),
                 )
                 P = model(im1)
                 Q = model(im2)
@@ -213,5 +211,7 @@ class Model:
                 #     data,
                 # )
         if should_save:
-            torch.save(model.state_dict(), "models/trained_models/{}.pth".format(model.name))
+            torch.save(
+                model.state_dict(), "models/trained_models/{}.pth".format(model.name)
+            )
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
