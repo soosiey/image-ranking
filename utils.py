@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import time
+from PIL import Image
 import numpy as np
 
 
@@ -66,28 +67,38 @@ class TinyImage(Dataset):
         self.loader = loader
         self.transform = transform
         for idx, val in enumerate(os.listdir(self.root_dir)):
-            curr_dir = os.path.join(self.root_dir, val, "images")
+            curr_dir = os.path.join(self.root_dir, val)
+            if self.train:
+                curr_dir = os.path.join(self.root_dir, val, "images")
             curr_images = list(
                 map(lambda x: os.path.join(curr_dir, x), os.listdir(curr_dir))
             )
             self.path_to_img[curr_dir] = curr_images
             self.class_to_path[idx] = curr_dir
             self.all_images += list(
-                map(lambda x: (os.path.join(curr_dir, x), idx), curr_images)
+                map(lambda x: (x, idx), curr_images)
             )
 
-    def __getitem__(self, idx):
-        imp1, im_class = self.all_images[idx]
-        imp2 = np.random.choice(self.path_to_img[self.class_to_path[im_class]])
-        diff_class = np.random.choice(
-            range(0, im_class) + range(im_class + 1, self.num_classes)
-        )
-        imp3 = np.random.choice(self.path_to_img[self.class_to_path[diff_class]])
+        if self.train:
+            self.triplets = []
+            for idx in range(len(self.all_images)):
+                imp1, im_class = self.all_images[idx]
+                imp2 = np.random.choice(self.path_to_img[self.class_to_path[im_class]])
+                diff_class = np.random.choice(
+                    list(range(0, im_class)) + list(range(im_class + 1, self.num_classes))
+                )
+                imp3 = np.random.choice(self.path_to_img[self.class_to_path[diff_class]])
+                self.triplets.append((imp1, imp2, imp3))
 
-        images = [imp1, imp2, imp3]
+    def __getitem__(self, idx):
+        imp, im_class = self.all_images[idx]
+        images = [imp]
+        if self.train:
+            images = list(self.triplets[idx])
+
         for idx, imp in enumerate(images):
             images[idx] = self.loader(imp)
-            if self.transforms:
+            if self.transform:
                 images[idx] = self.transform(images[idx])
         return images
 
@@ -100,6 +111,8 @@ class Data:
         self,
         batch_size,
         criterion,
+        data_dir,
+        upsample=None,
         scheduler=None,
         transform_train=None,
         transform_test=None,
@@ -107,6 +120,10 @@ class Data:
         self.batch_size = batch_size
         self.criterion = criterion
         self.scheduler = scheduler
+        if upsample is not None:
+            self.upsample = upsample
+        else:
+            self.upsample = (lambda x: x)
 
         if transform_train is None:
             transform_train = [
@@ -121,48 +138,50 @@ class Data:
 
         transform_test = transforms.Compose(transform_test)
 
-        train_dir = "./dataset/tiny-imagenet-200/train/"
+        train_dir = os.path.join(data_dir, "train/")
         train_dataset = TinyImage(train_dir, transform=transform_train)
 
         self.train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
         )
 
-        val_dir = "./dataset/tiny-imagenet-200/val/"
+        val_dir = os.path.join(data_dir, "val/")
         if "val_" in os.listdir(val_dir + "images/")[0]:
             create_val_folder(val_dir)
-            val_dir = val_dir + "images/"
-        else:
-            val_dir = val_dir + "images/"
+        val_dir += "images"
+        
         val_dataset = TinyImage(val_dir, transform=transform_test, train=False)
         self.val_loader = torch.utils.data.DataLoader(
             val_dataset, batch_size=batch_size, shuffle=False, num_workers=8
         )
 
-    def train(self, model, optimizer, start_epoch=0, should_save=True):
+    def train(self, no_epoch, model, optimizer, start_epoch=0, should_save=True):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         test_acc_list = []
         train_acc_list = []
         time_list = []
         start_time = time.time()
-        for epoch in range(start_epoch, self.no_epoch):
+        for epoch in range(start_epoch, no_epoch):
             model.train()
             train_accu = []
             for batch_idx, (im1, im2, im3) in enumerate(self.train_loader):
                 im1, im2, im3 = (
-                    Variable(im1).to(device),
-                    Variable(im2).to(device),
-                    Variable(im3).to(device),
+                    self.upsample(Variable(im1).to(device)),
+                    self.upsample(Variable(im2).to(device)),
+                    self.upsample(Variable(im3).to(device)),
                 )
+                print("Running P model", epoch, batch_idx, end="\r")
                 P = model(im1)
+                print("Running Q model", epoch, batch_idx, end="\r")
                 Q = model(im2)
+                print("Running R model", epoch, batch_idx, end="\r")
                 R = model(im3)
-                loss = self.criterion(im1, im2, im3)
-                self.optimizer.zero_grad()
+                loss = self.criterion(P, Q, R)
+                optimizer.zero_grad()
                 loss.backward()
 
-                self.optimizer.step()
+                optimizer.step()
                 # prediction = output.data.max(1)[1]
                 # accuracy = (
                 #     float(prediction.eq(Y_train_batch.data).sum())
@@ -196,6 +215,7 @@ class Data:
             # time_list.append(time.time() - start_time)
 
             if (epoch + 1) % 1 == 0 and should_save:
+                print("Saving Model")
                 torch.save(
                     model.state_dict(),
                     "models/trained_models/temp_{}_{}.pth".format(model.name, epoch),

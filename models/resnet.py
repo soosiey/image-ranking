@@ -1,10 +1,11 @@
 import torch
+import torchvision
 import torch.utils.data
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 
-from main_model import GeneralModel
+from models.main_model import GeneralModel
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -56,7 +57,7 @@ class ResNet(GeneralModel):
         self.layer3 = self._make_layer(block, 128, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 256, layers[3], stride=2)
         # self.avgpool = nn.AvgPool2d(7, stride=1)
-        self.fc = nn.Linear(256 * block.expansion, num_classes)
+        self.fc = nn.Linear(256 * block.expansion * 4, num_classes)
         self.dropout = torch.nn.Dropout2d(p=dropout_prob)
 
     def _make_layer(self, block, planes, blocks, stride=1):
@@ -107,9 +108,10 @@ model_urls = {
 
 
 def resnet18(pretrained=True):
-    model = ResNet(BasicBlock, [2, 2, 2, 2])
+    model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
     if pretrained:
         model.load_state_dict(
             model_zoo.load_url(model_urls["resnet18"], model_dir="~/scratch/HW4_Model")
         )
+    model.name = "ResNet18"
     return model
