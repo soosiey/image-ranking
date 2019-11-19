@@ -68,7 +68,7 @@ class TinyImage(Dataset):
         self.transform = transform
         for idx, val in enumerate(os.listdir(self.root_dir)):
             curr_dir = os.path.join(self.root_dir, val)
-            if self.train:
+            if "train" in self.root_dir:
                 curr_dir = os.path.join(self.root_dir, val, "images")
             curr_images = list(
                 map(lambda x: os.path.join(curr_dir, x), os.listdir(curr_dir))
@@ -79,28 +79,26 @@ class TinyImage(Dataset):
                 map(lambda x: (x, idx), curr_images)
             )
 
-        if self.train:
-            self.triplets = []
-            for idx in range(len(self.all_images)):
-                imp1, im_class = self.all_images[idx]
-                imp2 = np.random.choice(self.path_to_img[self.class_to_path[im_class]])
-                diff_class = np.random.choice(
-                    list(range(0, im_class)) + list(range(im_class + 1, self.num_classes))
-                )
-                imp3 = np.random.choice(self.path_to_img[self.class_to_path[diff_class]])
-                self.triplets.append((imp1, imp2, imp3))
 
     def __getitem__(self, idx):
         imp, im_class = self.all_images[idx]
         images = [imp]
         if self.train:
-            images = list(self.triplets[idx])
+            imp1, im_class = self.all_images[idx]
+            imp2 = np.random.choice(self.path_to_img[self.class_to_path[im_class]])
+            diff_class = np.random.choice(
+                range(0, im_class) + range(im_class + 1, self.num_classes)
+            )
+            imp3 = np.random.choice(self.path_to_img[self.class_to_path[diff_class]])
+
+            images = [imp1, imp2, imp3]
+
 
         for idx, imp in enumerate(images):
             images[idx] = self.loader(imp)
             if self.transform:
                 images[idx] = self.transform(images[idx])
-        return images
+        return images, im_class
 
     def __len__(self):
         return len(self.all_images)
@@ -144,6 +142,12 @@ class Data:
         self.train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
         )
+        
+        train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
+
+        self.emb_train =  = torch.utils.data.DataLoader(
+            train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
+        )
 
         val_dir = os.path.join(data_dir, "val/")
         if "val_" in os.listdir(val_dir + "images/")[0]:
@@ -165,7 +169,7 @@ class Data:
         for epoch in range(start_epoch, no_epoch):
             model.train()
             train_accu = []
-            for batch_idx, (im1, im2, im3) in enumerate(self.train_loader):
+            for batch_idx, ((im1, im2, im3), _) in enumerate(self.train_loader):
                 im1, im2, im3 = (
                     self.upsample(Variable(im1).to(device)),
                     self.upsample(Variable(im2).to(device)),
@@ -235,3 +239,29 @@ class Data:
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
+
+    def test(self, model):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        loss_arr = []
+        for batch_idx, ((im1, im2, im3), j) in enumerate(self.train_loader):
+            im1, im2, im3 = (
+                self.upsample(Variable(im1).to(device)),
+                self.upsample(Variable(im2).to(device)),
+                self.upsample(Variable(im3).to(device)),
+            )
+            P = model(im1)
+            Q = model(im2)
+            R = model(im3)
+            loss = self.criterion(P, Q, R)
+            loss_arr.append(loss.item())
+        print(np.mean(loss_arr))
+
+    def train_emb(self, model):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        for batch_idx, (im, j) in enumerate(self.emb_train):
+            im = (self.upsampl(Varible(im).to(device)))
+            val = model(im)
+            # TODO: Naveen
+            

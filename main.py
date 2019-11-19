@@ -18,12 +18,12 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
-model = ResNet(BasicBlock, [2,2,2,2], num_classes=200)#resnet18(pretrained=True)
+model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 #model.fc = nn.Linear(model.fc.in_features, 200)
 
 # Hyperparamters
-batch_size = 32
-no_epoch = 200
+batch_size = 64
+no_epoch = 75
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.TripletMarginLoss(
@@ -43,13 +43,15 @@ data = Data(
 )
 
 
-start_epoch = 0  # Change me!
-if os.path.exists("models/trained_models/temp_{}_{}.model".format(model.name, start_epoch)):
+start_epoch = 34  # Change me!
+if os.path.exists("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)):
+    print("found model")
     model.load_state_dict(
         torch.load(
-            "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
+            "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch+1)
         )
     )
+    #data.test(model)
     data.train(no_epoch, model, optimizer, start_epoch=start_epoch)
 else:
     data.train(no_epoch, model, optimizer)
