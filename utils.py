@@ -196,15 +196,9 @@ class Data:
             l = np.mean(epochLosses)
             print('Loss for epoch' + epoch + ': ' + l)
             losses.append(l)
-            np.save(training_q, 'trainEmbeddings{}_{}'.format(model.name, epoch))
-            np.save(classes_q, 'embeddingClasses{}_{}'.format(model.name, epoch))
+            
 
-                # prediction = output.data.max(1)[1]
-                # accuracy = (
-                #     float(prediction.eq(Y_train_batch.data).sum())
-                #     / float(self.batch_size)
-                # ) * 100.0
-                # train_accu.append(accuracy)
+
             if self.scheduler is not None:
                 self.scheduler.step()
             # train_acc = np.mean(train_accu)
@@ -231,7 +225,7 @@ class Data:
             # test_acc_list.append(test_acc)
             # time_list.append(time.time() - start_time)
 
-            if (epoch + 1) % 1 == 0 and should_save:
+            if (epoch + 1) % 3 == 0 and should_save:
                 print("Saving Model")
                 torch.save(
                     model.state_dict(),
@@ -241,6 +235,8 @@ class Data:
                     optimizer,
                     "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
                 )
+                np.save(training_q, 'trainEmbeddings{}_{}.npy'.format(model.name, epoch))
+                np.save(classes_q, 'embeddingClasses{}_{}.npy'.format(model.name, epoch))
                 # data = [train_acc_list, test_acc_list]
                 # data = np.asarray(data)
                 # np.save(
@@ -252,7 +248,9 @@ class Data:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-            np.save(losses,'Losses{}'.format(model.name))
+            np.save(losses,'Losses{}.npy'.format(model.name))
+            np.save(training_q, 'trainEmbeddings{}.npy'.format(model.name))
+            np.save(classes_q, 'embeddingClasses{}.npy'.format(model.name))
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
@@ -263,7 +261,7 @@ class Data:
             im1 = self.upsample(Variable(im1).to(device))
             Q = model(im1)
             testing_q += list(Q.data.cpu().numpy())
-        np.save(testing_q, 'testEmbeddings{}_{}'.format(model.name, epoch))
+        np.save(testing_q, 'testEmbeddings{}_{}.npy'.format(model.name, epoch))
 
     def train_emb(self, model):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
