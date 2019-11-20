@@ -9,6 +9,8 @@ import torchvision.datasets as datasets
 import time
 from PIL import Image
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
 
 
 def create_val_folder(val_dir):
@@ -271,3 +273,13 @@ class Data:
             val = model(im)
             # TODO: Naveen
 
+
+    def knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels, k = 30):
+
+        knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
+        knn.fit(train_embeddings, train_labels)
+        predicted_labels = []
+        for test_image in test_embeddings: #this can be changed to batch later
+            predicted_labels.append(knn.predict(test_image))
+        accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
+        return accuracy
