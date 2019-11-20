@@ -168,8 +168,8 @@ class Data:
         start_time = time.time()
         losses = []
         for epoch in range(start_epoch, no_epoch):
-            training_p = []
-            classes_p = []
+            training_q = []
+            classes_q = []
             model.train()
             train_accu = []
             epochLosses = []
@@ -179,15 +179,15 @@ class Data:
                     self.upsample(Variable(im2).to(device)),
                     self.upsample(Variable(im3).to(device)),
                 )
-                print("Running P model", epoch, batch_idx, end="\r")
-                P = model(im1)
-                training_p += list(P.data.cpu().numpy())
-                classes_p += c
                 print("Running Q model", epoch, batch_idx, end="\r")
-                Q = model(im2)
-                print("Running R model", epoch, batch_idx, end="\r")
-                R = model(im3)
-                loss = self.criterion(P, Q, R)
+                Q = model(im1)
+                training_q += list(Q.data.cpu().numpy())
+                classes_q += c
+                print("Running P model", epoch, batch_idx, end="\r")
+                P = model(im2)
+                print("Running N model", epoch, batch_idx, end="\r")
+                N = model(im3)
+                loss = self.criterion(Q, P, N)
                 optimizer.zero_grad()
                 loss.backward()
 
@@ -196,8 +196,8 @@ class Data:
             l = np.mean(epochLosses)
             print('Loss for epoch' + epoch + ': ' + l)
             losses.append(l)
-            np.save(training_p, 'trainEmbeddings{}_{}'.format(model.name, epoch))
-            np.save(classes_p, 'embeddingClasses{}_{}'.format(model.name, epoch))
+            np.save(training_q, 'trainEmbeddings{}_{}'.format(model.name, epoch))
+            np.save(classes_q, 'embeddingClasses{}_{}'.format(model.name, epoch))
 
                 # prediction = output.data.max(1)[1]
                 # accuracy = (
@@ -265,10 +265,10 @@ class Data:
                 self.upsample(Variable(im2).to(device)),
                 self.upsample(Variable(im3).to(device)),
             )
-            P = model(im1)
-            Q = model(im2)
-            R = model(im3)
-            loss = self.criterion(P, Q, R)
+            Q = model(im1)
+            P = model(im2)
+            N = model(im3)
+            loss = self.criterion(Q, P, N)
             loss_arr.append(loss.item())
         print(np.mean(loss_arr))
 
@@ -276,7 +276,7 @@ class Data:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         for batch_idx, (im, j) in enumerate(self.emb_train):
-            im = (self.upsampl(Varible(im).to(device)))
+            im = (self.upsampl(Variable(im).to(device)))
             val = model(im)
             # TODO: Naveen
 
