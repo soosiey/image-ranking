@@ -142,10 +142,10 @@ class Data:
         self.train_loader = torch.utils.data.DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
         )
-        
+
         train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
 
-        self.emb_train =  = torch.utils.data.DataLoader(
+        self.emb_train = torch.utils.data.DataLoader(
             train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
         )
 
@@ -153,7 +153,7 @@ class Data:
         if "val_" in os.listdir(val_dir + "images/")[0]:
             create_val_folder(val_dir)
         val_dir += "images"
-        
+
         val_dataset = TinyImage(val_dir, transform=transform_test, train=False)
         self.val_loader = torch.utils.data.DataLoader(
             val_dataset, batch_size=batch_size, shuffle=False, num_workers=8
@@ -166,10 +166,14 @@ class Data:
         train_acc_list = []
         time_list = []
         start_time = time.time()
+        losses = []
         for epoch in range(start_epoch, no_epoch):
+            training_p = []
+            classes_p = []
             model.train()
             train_accu = []
-            for batch_idx, ((im1, im2, im3), _) in enumerate(self.train_loader):
+            epochLosses = []
+            for batch_idx, ((im1, im2, im3), c) in enumerate(self.train_loader):
                 im1, im2, im3 = (
                     self.upsample(Variable(im1).to(device)),
                     self.upsample(Variable(im2).to(device)),
@@ -177,6 +181,8 @@ class Data:
                 )
                 print("Running P model", epoch, batch_idx, end="\r")
                 P = model(im1)
+                training_p += list(P.data.cpu().numpy())
+                classes_p += c
                 print("Running Q model", epoch, batch_idx, end="\r")
                 Q = model(im2)
                 print("Running R model", epoch, batch_idx, end="\r")
@@ -186,6 +192,13 @@ class Data:
                 loss.backward()
 
                 optimizer.step()
+                epochLosses.append(loss.item())
+            l = np.mean(epochLosses)
+            print('Loss for epoch' + epoch + ': ' + l)
+            losses.append(l)
+            np.save(training_p, 'trainEmbeddings{}_{}'.format(model.name, epoch))
+            np.save(classes_p, 'embeddingClasses{}_{}'.format(model.name, epoch))
+
                 # prediction = output.data.max(1)[1]
                 # accuracy = (
                 #     float(prediction.eq(Y_train_batch.data).sum())
@@ -234,10 +247,12 @@ class Data:
                 #     "models/trained_models/temp_{}_{}.npy".format(model.name, epoch),
                 #     data,
                 # )
+
         if should_save:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
+            np.save(losses,'Losses{}'.format(model.name))
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model):
@@ -264,4 +279,4 @@ class Data:
             im = (self.upsampl(Varible(im).to(device)))
             val = model(im)
             # TODO: Naveen
-            
+
