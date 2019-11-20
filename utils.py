@@ -255,22 +255,15 @@ class Data:
             np.save(losses,'Losses{}'.format(model.name))
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
-    def test(self, model):
+    def test(self, model, epoch):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
-        loss_arr = []
-        for batch_idx, ((im1, im2, im3), j) in enumerate(self.train_loader):
-            im1, im2, im3 = (
-                self.upsample(Variable(im1).to(device)),
-                self.upsample(Variable(im2).to(device)),
-                self.upsample(Variable(im3).to(device)),
-            )
+        testing_q = []
+        for batch_idx, (im1, j) in enumerate(self.val_loader):
+            im1 = self.upsample(Variable(im1).to(device))
             Q = model(im1)
-            P = model(im2)
-            N = model(im3)
-            loss = self.criterion(Q, P, N)
-            loss_arr.append(loss.item())
-        print(np.mean(loss_arr))
+            testing_q += list(Q.data.cpu().numpy())
+        np.save(testing_q, 'testEmbeddings{}_{}'.format(model.name, epoch))
 
     def train_emb(self, model):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
