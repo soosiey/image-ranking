@@ -89,11 +89,16 @@ class TinyImage(Dataset):
             imp1, im_class = self.all_images[idx]
             imp2 = np.random.choice(self.path_to_img[self.class_to_path[im_class]])
             diff_class = np.random.choice(
-                range(0, im_class) + range(im_class + 1, self.num_classes)
+                list(range(0, im_class)) + list(range(im_class + 1, self.num_classes))
             )
             imp3 = np.random.choice(self.path_to_img[self.class_to_path[diff_class]])
 
             images = [imp1, imp2, imp3]
+        else:
+            imp = self.loader(imp)
+            if self.transform:
+                imp = self.transform(imp)
+            return imp, im_class
 
 
         for idx, imp in enumerate(images):
@@ -184,7 +189,7 @@ class Data:
                 print("Running Q model", epoch, batch_idx, end="\r")
                 Q = model(im1)
                 training_q += list(Q.data.cpu().numpy())
-                classes_q += c
+                classes_q += list(c.data.cpu().numpy())
                 print("Running P model", epoch, batch_idx, end="\r")
                 P = model(im2)
                 print("Running N model", epoch, batch_idx, end="\r")
@@ -196,7 +201,7 @@ class Data:
                 optimizer.step()
                 epochLosses.append(loss.item())
             l = np.mean(epochLosses)
-            print('Loss for epoch' + epoch + ': ' + l)
+            print('Loss for epoch', epoch, ':', l)
             losses.append(l)
             
 
@@ -237,8 +242,8 @@ class Data:
                     optimizer,
                     "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
                 )
-                np.save(training_q, 'trainEmbeddings{}_{}.npy'.format(model.name, epoch))
-                np.save(classes_q, 'embeddingClasses{}_{}.npy'.format(model.name, epoch))
+                np.save('trainEmbeddings{}_{}.npy'.format(model.name, epoch), training_q)
+                np.save('embeddingClasses{}_{}.npy'.format(model.name, epoch), classes_q)
                 # data = [train_acc_list, test_acc_list]
                 # data = np.asarray(data)
                 # np.save(
@@ -250,20 +255,23 @@ class Data:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-            np.save(losses,'Losses{}.npy'.format(model.name))
-            np.save(training_q, 'trainEmbeddings{}.npy'.format(model.name))
-            np.save(classes_q, 'embeddingClasses{}.npy'.format(model.name))
+            np.save('Losses{}.npy'.format(model.name), losses)
+            np.save( 'trainEmbeddings{}.npy'.format(model.name), training_q)
+            np.save('embeddingClasses{}.npy'.format(model.name), classes_q)
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         testing_q = []
+        classes_q = []
         for batch_idx, (im1, j) in enumerate(self.val_loader):
             im1 = self.upsample(Variable(im1).to(device))
             Q = model(im1)
             testing_q += list(Q.data.cpu().numpy())
-        np.save(testing_q, 'testEmbeddings{}_{}.npy'.format(model.name, epoch))
+            classes_q += list(j.data.cpu().numpy())
+        np.save('testEmbeddings{}_{}.npy'.format(model.name, epoch), testing_q)
+        np.save('testclasses{}_{}.npy'.format(model.name, epoch), classes_q)
 
     def train_emb(self, model):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -274,12 +282,10 @@ class Data:
             # TODO: Naveen
 
 
-    def knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels, k = 30):
+    def knn_accuracy(self, train_embeddings, test_embeddings, train_labels, test_labels, k = 30):
 
         knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
         knn.fit(train_embeddings, train_labels)
-        predicted_labels = []
-        for test_image in test_embeddings: #this can be changed to batch later
-            predicted_labels.append(knn.predict(test_image))
+        predicted_labels = knn.predict(test_embeddings)
         accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
         return accuracy

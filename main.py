@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 import torch.optim as optim
 import torch.nn as nn
 from utils import Data
+import numpy as np
 
 from models.resnet import resnet18, ResNet, BasicBlock
 
@@ -23,7 +24,7 @@ model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 
 # Hyperparamters
 batch_size = 64
-no_epoch = 75
+no_epoch = 105
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.TripletMarginLoss(
@@ -42,16 +43,32 @@ data = Data(
     transform_test=transform_test,
 )
 
-
+'''
 start_epoch = 34  # Change me!
 if os.path.exists("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)):
     print("found model")
     model.load_state_dict(
         torch.load(
-            "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch+1)
+            "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
         )
     )
     #data.test(model)
-    data.train(no_epoch, model, optimizer, start_epoch=start_epoch)
+    data.train(no_epoch, model, optimizer, start_epoch=start_epoch+1)
 else:
     data.train(no_epoch, model, optimizer)
+'''
+
+epoch = 35
+model.load_state_dict(
+        torch.load(
+            "models/trained_models/temp_{}_{}.pth".format(model.name, epoch)
+        )
+)
+
+#data.test(model, epoch)
+train_embeddings = np.load('trainEmbeddings{}_{}.npy'.format(model.name, epoch))
+test_embeddings = np.load('testEmbeddings{}_{}.npy'.format(model.name, epoch))
+train_labels = np.load('embeddingClasses{}_{}.npy'.format(model.name, epoch))
+test_labels = np.load('testclasses{}_{}.npy'.format(model.name, epoch))
+print(data.knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels))
+
