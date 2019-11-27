@@ -22,10 +22,11 @@ transform_train = [
 #model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 #model.fc = nn.Linear(model.fc.in_features, 200)
 model = resnet18(pretrained=True)
+model.fc = nn.Linear(2048, 1024) #2048
 
 # Hyperparamters
-batch_size = 64
-no_epoch = 105
+batch_size = 16
+no_epoch = 70
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
 criterion = nn.TripletMarginLoss(
@@ -45,7 +46,7 @@ data = Data(
 )
 
 
-start_epoch = 34  # Change me!
+start_epoch = 0  # Change me!
 should_train = True
 should_test = False
 if should_train:

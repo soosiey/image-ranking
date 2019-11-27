@@ -283,9 +283,25 @@ class Data:
 
 
     def knn_accuracy(self, train_embeddings, test_embeddings, train_labels, test_labels, k = 30):
-
-        knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
-        knn.fit(train_embeddings, train_labels)
-        predicted_labels = knn.predict(test_embeddings)
-        accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
-        return accuracy
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        train_embeddings = torch.from_numpy(train_embeddings).float().to(device)
+        train_labels = torch.from_numpy(train_labels).float().to(device)
+        test_labels = torch.from_numpy(test_labels).float().to(device)
+        accuracies = []
+        for idx, test in enumerate(test_embeddings):
+            test = torch.from_numpy(test).float().to(device)
+            dist = torch.sum((train_embeddings - test).pow(2), dim=1)
+            _, ind = sort_dist = torch.topk(dist, k, largest=False)
+            count = torch.sum(train_labels[ind] == test_labels[idx])
+            print(count, count.item()/float(k))
+            accuracies.append(count.item()/float(k))
+        #knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
+        #knn.fit(train_embeddings, train_labels)
+        #predicted_labels = knn.predict_proba(test_embeddings)
+        #accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
+        #accuracies = []
+        #for idx, sample in enumerate(predicted_labels):
+        #    acc = sample[test_labels[idx]]
+        #    print("acc", acc, "label", test_labels[idx])
+        #    accuracies.append(acc)
+        return np.mean(accuracies)
