@@ -242,8 +242,8 @@ class Data:
                     optimizer,
                     "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
                 )
-                np.save('trainEmbeddings{}_{}.npy'.format(model.name, epoch), training_q)
-                np.save('embeddingClasses{}_{}.npy'.format(model.name, epoch), classes_q)
+                np.save('embeddings/train_{}_{}.npy'.format(model.name, epoch), training_q)
+                np.save('embeddings/train_labels_{}_{}.npy'.format(model.name, epoch), classes_q)
                 # data = [train_acc_list, test_acc_list]
                 # data = np.asarray(data)
                 # np.save(
@@ -255,9 +255,9 @@ class Data:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-            np.save('Losses{}.npy'.format(model.name), losses)
-            np.save( 'trainEmbeddings{}.npy'.format(model.name), training_q)
-            np.save('embeddingClasses{}.npy'.format(model.name), classes_q)
+            np.save('losses_{}.npy'.format(model.name), losses)
+            np.save( 'embeddings/train_{}.npy'.format(model.name), training_q)
+            np.save('embeddings/train_labels_{}.npy'.format(model.name), classes_q)
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
@@ -270,8 +270,8 @@ class Data:
             Q = model(im1)
             testing_q += list(Q.data.cpu().numpy())
             classes_q += list(j.data.cpu().numpy())
-        np.save('testEmbeddings{}_{}.npy'.format(model.name, epoch), testing_q)
-        np.save('testclasses{}_{}.npy'.format(model.name, epoch), classes_q)
+        np.save('embeddings/test_{}_{}.npy'.format(model.name, epoch), testing_q)
+        np.save('embeddings/test_labels_{}_{}.npy'.format(model.name, epoch), classes_q)
 
     def train_emb(self, model):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
