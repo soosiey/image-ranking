@@ -19,21 +19,22 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
-#model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
+model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
+model._name = "ResNet101"#resnet18(pretrained=True)
 #model.fc = nn.Linear(model.fc.in_features, 200)
-model = resnet18(pretrained=True)
-model.fc = nn.Linear(2048, 1024) #2048
+#model = resnet18(pretrained=False)
+#model.fc = nn.Linear(2048, 1024) #2048
 
 # Hyperparamters
-batch_size = 16
+batch_size = 32
 no_epoch = 70
 LR = 0.001
-optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
 criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5)
-upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True) 
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
+upsample = None #nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True) 
 
 data = Data(
     batch_size,
@@ -46,12 +47,12 @@ data = Data(
 )
 
 
-start_epoch = 0  # Change me!
+start_epoch = 2  # Change me!
 should_train = True
 should_test = False
 if should_train:
   if os.path.exists("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)):
-    print("found model")
+    print("found model", model.name)
     model.load_state_dict(
         torch.load(
             "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)

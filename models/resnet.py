@@ -116,3 +116,15 @@ def resnet18(pretrained=True):
         )
     model.name = "ResNet18-Torch"
     return model
+
+def resnet101(pretrained=True):
+    #model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
+    model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [3, 4, 23, 3])
+    if pretrained:
+        model.load_state_dict(
+            model_zoo.load_url(model_urls["resnet101"], model_dir="~/scratch/HW4_Model")
+        )
+    model.name = "ResNet101-Torch"
+    return model
+
+

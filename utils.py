@@ -174,9 +174,8 @@ class Data:
         time_list = []
         start_time = time.time()
         losses = []
+        print("Training started")
         for epoch in range(start_epoch, no_epoch):
-            training_q = []
-            classes_q = []
             model.train()
             train_accu = []
             epochLosses = []
@@ -186,13 +185,8 @@ class Data:
                     self.upsample(Variable(im2).to(device)),
                     self.upsample(Variable(im3).to(device)),
                 )
-                print("Running Q model", epoch, batch_idx, end="\r")
                 Q = model(im1)
-                training_q += list(Q.data.cpu().numpy())
-                classes_q += list(c.data.cpu().numpy())
-                print("Running P model", epoch, batch_idx, end="\r")
                 P = model(im2)
-                print("Running N model", epoch, batch_idx, end="\r")
                 N = model(im3)
                 loss = self.criterion(Q, P, N)
                 optimizer.zero_grad()
@@ -208,63 +202,31 @@ class Data:
 
             if self.scheduler is not None:
                 self.scheduler.step()
-            # train_acc = np.mean(train_accu)
 
-            # with torch.no_grad():
-            #     model.eval()
-            #     test_accu = []
-            #     for batch_idx, (X_test_batch, Y_test_batch) in enumerate(
-            #         self.val_loader
-            #     ):
-            #         X_test_batch, Y_test_batch = (
-            #             Variable(X_test_batch).to(device),
-            #             Variable(Y_test_batch).to(device),
-            #         )
-            #         output = model(X_test_batch)
-            #         prediction = output.data.max(1)[1]
-            #         accuracy = (
-            #             float(prediction.eq(Y_test_batch.data).sum())
-            #             / float(self.batch_size)
-            #         ) * 100.0
-            #         test_accu = []
-            #     test_acc = np.mean(test_accu)
-            # train_acc_list.append(train_acc)
-            # test_acc_list.append(test_acc)
-            # time_list.append(time.time() - start_time)
-
-            if (epoch + 1) % 3 == 0 and should_save:
+            if (epoch + 1) % 1 == 0 and should_save:
                 print("Saving Model")
                 torch.save(
                     model.state_dict(),
                     "models/trained_models/temp_{}_{}.pth".format(model.name, epoch),
                 )
-                torch.save(
-                    optimizer,
-                    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
-                )
-                np.save('embeddings/train_{}_{}.npy'.format(model.name, epoch), training_q)
-                np.save('embeddings/train_labels_{}_{}.npy'.format(model.name, epoch), classes_q)
-                # data = [train_acc_list, test_acc_list]
-                # data = np.asarray(data)
-                # np.save(
-                #     "models/trained_models/temp_{}_{}.npy".format(model.name, epoch),
-                #     data,
-                # )
+                #torch.save(
+                #    optimizer,
+                #    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
+                #)
 
         if should_save:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
             np.save('losses_{}.npy'.format(model.name), losses)
-            np.save( 'embeddings/train_{}.npy'.format(model.name), training_q)
-            np.save('embeddings/train_labels_{}.npy'.format(model.name), classes_q)
-            # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
+        model.eval()
         testing_q = []
         classes_q = []
+        print("Creating test embeddings")
         for batch_idx, (im1, j) in enumerate(self.val_loader):
             im1 = self.upsample(Variable(im1).to(device))
             Q = model(im1)
@@ -273,13 +235,22 @@ class Data:
         np.save('embeddings/test_{}_{}.npy'.format(model.name, epoch), testing_q)
         np.save('embeddings/test_labels_{}_{}.npy'.format(model.name, epoch), classes_q)
 
-    def train_emb(self, model):
+    def train_emb(self, model, epoch):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
-        for batch_idx, (im, j) in enumerate(self.emb_train):
-            im = (self.upsampl(Variable(im).to(device)))
+        model.eval()
+        testing_q = []
+        classes_q = []
+        print("Creating Train Embeddings")
+        for batch_idx, ((im, _, _), c) in enumerate(self.train_loader):
+            im = (self.upsample(Variable(im).to(device)))
             val = model(im)
-            # TODO: Naveen
+            testing_q += list(val.data.cpu().numpy())
+            classes_q += list(c.data.cpu().numpy())
+            if batch_idx % 13 == 0:
+                print("Finishing with", batch_idx)
+        np.save('embeddings/train_{}_{}.npy'.format(model.name, epoch), testing_q)
+        np.save('embeddings/train_labels_{}_{}.npy'.format(model.name, epoch), classes_q)
 
 
     def knn_accuracy(self, train_embeddings, test_embeddings, train_labels, test_labels, k = 30):
@@ -288,12 +259,14 @@ class Data:
         train_labels = torch.from_numpy(train_labels).float().to(device)
         test_labels = torch.from_numpy(test_labels).float().to(device)
         accuracies = []
+        tc = 0
         for idx, test in enumerate(test_embeddings):
             test = torch.from_numpy(test).float().to(device)
             dist = torch.sum((train_embeddings - test).pow(2), dim=1)
             _, ind = sort_dist = torch.topk(dist, k, largest=False)
             count = torch.sum(train_labels[ind] == test_labels[idx])
-            print(count, count.item()/float(k))
+            if count.item() > 0:
+                tc += 1
             accuracies.append(count.item()/float(k))
         #knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
         #knn.fit(train_embeddings, train_labels)
@@ -304,4 +277,4 @@ class Data:
         #    acc = sample[test_labels[idx]]
         #    print("acc", acc, "label", test_labels[idx])
         #    accuracies.append(acc)
-        return np.mean(accuracies)
+        return np.mean(accuracies), tc/10000.0
