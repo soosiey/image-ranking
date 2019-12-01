@@ -8,25 +8,7 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock
-import matplotlib.pyplot as plt
-import numpy as np
-import random
-import copy
-
-
-def show_figures(images, title):
-    plt.figure(figsize=(8, 10))
-    for idx, val in enumerate(images):
-        plt.subplot(len(11) / 5 + 1, 5, idx + 1)
-        plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
-        plt.xticks([], [])
-        plt.yticks([], [])
-        im, im_class, im_dist = val
-        plt.title("{} {}".format(im_class, im_dist))
-        plt.imshow(im, cmap="gray")
-    plt.tight_layout()
-    plt.savefig(title)
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 
 
 transform_test = [transforms.ToTensor()]
@@ -37,23 +19,21 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
-
-# model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
-# model._name = "ResNet101"  # resnet18(pretrained=True)
+# model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
-model = resnet18(pretrained=False)
-model.fc = nn.Linear(2048, 1024)  # 2048
+# model = resnet18(pretrained=False)
+# model.fc = nn.Linear(2048, 1024) #2048
+# model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
+# model._name = "ResNet101"
+model = resnet34(pretrained=False)
 
 # Hyperparamters
-batch_size = 32
+batch_size = 64
 no_epoch = 70
 LR = 0.001
-optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
 criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
-
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
 upsample = None  # nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 data = Data(
@@ -61,18 +41,22 @@ data = Data(
     criterion,
     "../data/tiny-imagenet-200/",
     upsample=upsample,
-    scheduler=scheduler,
     transform_train=transform_train,
     transform_test=transform_test,
 )
 
 
-start_epoch = 27  # Change me!
+start_epoch = 0  # Change me!
 
+model.load_state_dict(
+    torch.load(
+        "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
+    )
+)
+print("Retrieved model", model.name)
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
-    print("Please test your model first then graph it!")
-    exit()
-
+    data.train_emb(model, start_epoch)
+    data.test(model, start_epoch)
 train_embeddings = np.load(
     "embeddings/train_{}_{}.npy".format(model.name, start_epoch)
 )
@@ -85,8 +69,6 @@ train_labels = np.load(
 test_labels = np.load(
     "embeddings/test_labels_{}_{}.npy".format(model.name, start_epoch)
 )
-top, bottom = data.get_top_and_bottom(
-    train_embeddings, test_embeddings, train_labels, test_labels
+print(
+    data.knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels)
 )
-show_figures(top, "top_images.png")
-show_figures(top, "bottom_images.png")
