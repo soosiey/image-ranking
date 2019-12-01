@@ -313,7 +313,6 @@ class Data:
             im = im.data.cpu().numpy()
             im += 1.0
             im /= 2.0
-            print(im) 
             im = im.transpose(1, 2, 0) 
             top_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, low_dist):
