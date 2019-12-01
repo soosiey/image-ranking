@@ -9,24 +9,34 @@ from utils import Data
 import numpy as np
 
 from models.resnet import resnet18, ResNet, BasicBlock
-import matplotlib.pyplot as plt
 import numpy as np
 import random
 import copy
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import os
 
 def show_figures(images, title):
-    plt.figure(figsize=(8, 10))
+    #plt.figure(figsize=(8, 10))
+    fig = plt.figure(figsize=(11, 10))
+    gs = gridspec.GridSpec(11, 10)
+    gs.update(wspace=0.4, hspace=1.5, top=0.99, bottom=0.01)
     for idx, val in enumerate(images):
-        plt.subplot(len(11) / 5 + 1, 5, idx + 1)
-        plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
-        plt.xticks([], [])
-        plt.yticks([], [])
+        #plt.subplot(11 / 5 + 1, 5, idx + 1)
+        #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
+        ax = plt.subplot(gs[idx])
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_aspect('equal')
         im, im_class, im_dist = val
-        plt.title("{} {}".format(im_class, im_dist))
-        plt.imshow(im, cmap="gray")
-    plt.tight_layout()
-    plt.savefig(title)
+        ax.title.set_text("{} {}".format(im_class, im_dist))
+        plt.imshow(im)
+    #plt.tight_layout()
+    plt.savefig(title, bbox_inches="tight")
 
 
 transform_test = [transforms.ToTensor()]
@@ -88,5 +98,5 @@ test_labels = np.load(
 top, bottom = data.get_top_and_bottom(
     train_embeddings, test_embeddings, train_labels, test_labels
 )
-show_figures(top, "top_images.png")
-show_figures(top, "bottom_images.png")
+show_figures(top, "images/top_images.png")
+show_figures(top, "images/bottom_images.png")

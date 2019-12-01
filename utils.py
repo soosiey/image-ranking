@@ -288,43 +288,62 @@ class Data:
         test_labels = torch.from_numpy(test_labels).float().to(device)
         images = []
         chosen_classes = set()
+        data_set = self.val_loader.dataset
 
         while len(images) < 5:
             im_class = np.random.choice(
-                set(range(self.val_loader.num_classes)) - chosen_classes
+                list(set(range(data_set.num_classes)) - chosen_classes)
             )
             chosen_classes.add(im_class)
-            imp = self.val_loader.path_to_img[self.val_loader.class_to_path[im_class]]
+            imp = data_set.path_to_img[data_set.class_to_path[im_class]]
             len_imp = len(imp)
             idx = np.random.choice(range(len_imp))
-            imp = imp[idx]
-            im = self.val_loader.loader(imp)
-            if self.val_loader.transform:
-                im = self.val_loader.transform(im)
+            im, im_class = data_set.__getitem__(len_imp * im_class + idx)
+            print("Adding", im_class, "to set of images")
             images.append((im, im_class, len_imp * im_class + idx))
 
+        train_data_set = self.train_loader.dataset
+        print("Getting top images")
         top_images = []
         for im, im_class, im_idx in images:
             test = test_embeddings[im_idx]
             test = torch.from_numpy(test).float().to(device)
-            dist = torch.sum((train_embeddings - test).pow(2), dim=1)
-            _, ind = torch.topk(dist, k, largest=False)
+            dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
+            low_dist, ind = torch.topk(dist, k, largest=False)
+            im = im.data.cpu().numpy()
+            im += 1.0
+            im /= 2.0
+            print(im) 
+            im = im.transpose(1, 2, 0) 
             top_images.append((im, im_class, im_idx))
-            for idx in ind:
-                im1, im_class1 = self.val_loader.__getitem__(idx)
-                top_images.append((im1, im_class1, idx))
-                top_images = []
-
+            for idx, d in zip(ind, low_dist):
+                (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
+                im1 = im1.data.cpu().numpy()
+                im1 += 1.0
+                im1 /= 2.0
+                im1 = im1.transpose(1, 2, 0)
+                top_images.append((im1, im_class1, d.item()))
+                print("Match for", im_class, "is", im_class1, d.item())
+        print("Getting Bottom Images")
         bottom_images = []
         for im, im_class, im_idx in images:
             test = test_embeddings[im_idx]
             test = torch.from_numpy(test).float().to(device)
-            dist = torch.sum((train_embeddings - test).pow(2), dim=1)
-            _, ind = torch.topk(dist, k, largest=True)
+            dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
+            high_dist, ind = torch.topk(dist, k, largest=True)
+            im = im.data.cpu().numpy()
+            im += 1.0
+            im /= 2.0
+            im = im.transpose(1, 2, 0)
             bottom_images.append((im, im_class, im_idx))
-            for idx in ind:
-                im1, im_class1 = self.val_loader.__getitem__(idx)
-                bottom_images.append((im1, im_class1, idx))
+            for idx, d in zip(ind, high_dist):
+                (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
+                im1 = im1.data.cpu().numpy()
+                im1 += 1.0
+                im1 /= 2.0
+                im1 = im1.transpose(1, 2, 0)
+                print("Match for", im_class, "is", im_class1, d.item())
+                bottom_images.append((im1, im_class1, d.item()))
             # count = torch.sum(train_labels[ind] == test_labels[im_idx])
 
             # if count.item() > 0:
