@@ -263,7 +263,7 @@ class Data:
             test = torch.from_numpy(test).float().to(device)
             dist = torch.sum((train_embeddings - test).pow(2), dim=1)
             _, ind = sort_dist = torch.topk(dist, k, largest=False)
-            count = torch.sum(train_labels[ind] == test_labels[idx])
+            count = torch.sum(train_labels[ind] == test_labels[idx]).pow(0.5)
 
             if count.item() > 0:
                 tc += 1
@@ -311,15 +311,15 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             low_dist, ind = torch.topk(dist, k, largest=False)
             im = im.data.cpu().numpy()
-            im += 1.0
-            im /= 2.0
+            #im += 1.0
+            #im /= 2.0
             im = im.transpose(1, 2, 0) 
             top_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, low_dist):
                 (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
                 im1 = im1.data.cpu().numpy()
-                im1 += 1.0
-                im1 /= 2.0
+                #im1 += 1.0
+                #im1 /= 2.0
                 im1 = im1.transpose(1, 2, 0)
                 top_images.append((im1, im_class1, d.item()))
                 print("Match for", im_class, "is", im_class1, d.item())
@@ -331,15 +331,15 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             high_dist, ind = torch.topk(dist, k, largest=True)
             im = im.data.cpu().numpy()
-            im += 1.0
-            im /= 2.0
+            #im += 1.0
+            #im /= 2.0
             im = im.transpose(1, 2, 0)
             bottom_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, high_dist):
                 (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
                 im1 = im1.data.cpu().numpy()
-                im1 += 1.0
-                im1 /= 2.0
+                #im1 += 1.0
+                #im1 /= 2.0
                 im1 = im1.transpose(1, 2, 0)
                 print("Match for", im_class, "is", im_class1, d.item())
                 bottom_images.append((im1, im_class1, d.item()))
