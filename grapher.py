@@ -22,9 +22,9 @@ import os
 
 def show_figures(images, title):
     #plt.figure(figsize=(8, 10))
-    fig = plt.figure(figsize=(11, 10))
-    gs = gridspec.GridSpec(11, 10)
-    gs.update(wspace=0.4, hspace=1.5, top=0.99, bottom=0.01)
+    fig = plt.figure(figsize=(5, 11))
+    gs = gridspec.GridSpec(5, 11)
+    gs.update(wspace=0.5, hspace=1.5, top=0.99, bottom=0.01)
     for idx, val in enumerate(images):
         #plt.subplot(11 / 5 + 1, 5, idx + 1)
         #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
@@ -33,10 +33,10 @@ def show_figures(images, title):
         ax.set_yticklabels([])
         ax.set_aspect('equal')
         im, im_class, im_dist = val
-        ax.title.set_text("{} {}".format(im_class, im_dist))
+        ax.title.set_text("{} {}".format(im_class, round(im_dist, 2)))
         plt.imshow(im)
     #plt.tight_layout()
-    plt.savefig(title, bbox_inches="tight")
+    plt.savefig(title)
 
 
 transform_test = [transforms.ToTensor()]
