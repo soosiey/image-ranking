@@ -44,20 +44,20 @@ class BasicBlock(GeneralModel):
 
 
 class ResNet(GeneralModel):
-    def __init__(self, block, layers, num_classes=100, dropout_prob=0.2):
-        self.inplanes = 32
+    def __init__(self, block, layers, num_classes=100, dropout_prob=0.2, inplanes=32):
+        self.inplanes = inplanes
         super(ResNet, self).__init__()
         self._name = "ResNet"
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(32)
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         # self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 32, layers[0], stride=1)
-        self.layer2 = self._make_layer(block, 64, layers[1], stride=2)
-        self.layer3 = self._make_layer(block, 128, layers[2], stride=2)
-        self.layer4 = self._make_layer(block, 256, layers[3], stride=2)
+        self.layer1 = self._make_layer(block, inplanes, layers[0], stride=1)
+        self.layer2 = self._make_layer(block, inplanes*2, layers[1], stride=2)
+        self.layer3 = self._make_layer(block, inplanes*4, layers[2], stride=2)
+        self.layer4 = self._make_layer(block, inplanes*8, layers[3], stride=2)
         # self.avgpool = nn.AvgPool2d(7, stride=1)
-        self.fc = nn.Linear(256 * block.expansion * 4, num_classes)
+        self.fc = nn.Linear(inplanes*8 * block.expansion * 4, num_classes)
         self.dropout = torch.nn.Dropout2d(p=dropout_prob)
 
     def _make_layer(self, block, planes, blocks, stride=1):
@@ -127,4 +127,15 @@ def resnet101(pretrained=True):
     model.name = "ResNet101-Torch"
     return model
 
-
+def resnet34(pretrained=True):
+    model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=1000, inplanes=64)
+    if pretrained:
+        torch_model =  torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [3, 4, 6, 3])
+        torch_model.load_state_dict(model_zoo.load_url(model_urls['resnet34'], model_dir='~/scratch/HW4_Model'))
+        model.layer1.load_state_dict(torch_model.layer1.state_dict())
+        model.layer2.load_state_dict(torch_model.layer2.state_dict())
+        model.layer3.load_state_dict(torch_model.layer3.state_dict())
+        model.layer4.load_state_dict(torch_model.layer4.state_dict())
+        #model.fc.load_state_dict(torch_model.fc.state_dict())
+    model._name = "ResNet34"
+    return model

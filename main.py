@@ -8,7 +8,7 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 
 
 transform_test = [transforms.ToTensor()]
@@ -19,11 +19,13 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
-model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
-model._name = "ResNet101"#resnet18(pretrained=True)
+#model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
+#model._name = "ResNet"#resnet18(pretrained=True)
 #model.fc = nn.Linear(model.fc.in_features, 200)
 #model = resnet18(pretrained=False)
 #model.fc = nn.Linear(2048, 1024) #2048
+
+model = resnet34(pretrained=True)
 
 # Hyperparamters
 batch_size = 32
@@ -47,7 +49,7 @@ data = Data(
 )
 
 
-start_epoch = 2  # Change me!
+start_epoch = 0  # Change me!
 should_train = True
 should_test = False
 if should_train:
@@ -61,6 +63,7 @@ if should_train:
     #data.test(model)
     data.train(no_epoch, model, optimizer, start_epoch=start_epoch+1)
   else:
+    print("No model found for ", model.name)
     data.train(no_epoch, model, optimizer)
 
 if should_test:
