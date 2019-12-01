@@ -24,7 +24,7 @@ def show_figures(images, title):
     #plt.figure(figsize=(8, 10))
     fig = plt.figure(figsize=(5, 11))
     gs = gridspec.GridSpec(5, 11)
-    gs.update(wspace=0.5, hspace=0.8)
+    gs.update(wspace=1.5, hspace=0.8, top=1, right=1)
     for idx, val in enumerate(images):
         #plt.subplot(11 / 5 + 1, 5, idx + 1)
         #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
@@ -99,4 +99,4 @@ top, bottom = data.get_top_and_bottom(
     train_embeddings, test_embeddings, train_labels, test_labels
 )
 show_figures(top, "images/top_images.png")
-show_figures(top, "images/bottom_images.png")
+show_figures(bottom, "images/bottom_images.png")
