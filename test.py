@@ -21,11 +21,11 @@ transform_train = [
 
 # model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
-#model = resnet18(pretrained=False)
-#model.fc = nn.Linear(2048, 1024) #2048
+model = resnet18(pretrained=False)
+model.fc = nn.Linear(2048, 1024) #2048
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
 #model._name = "ResNet101"
-model = resnet34(pretrained=False)
+#model = resnet34(pretrained=False)
 
 # Hyperparamters
 batch_size = 64
@@ -34,7 +34,7 @@ LR = 0.001
 criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
-upsample = None# nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 data = Data(
     batch_size,
@@ -46,7 +46,7 @@ data = Data(
 )
 
 
-start_epoch = 16  # Change me!
+start_epoch = 39  # Change me!
 
 model.load_state_dict(
     torch.load(
