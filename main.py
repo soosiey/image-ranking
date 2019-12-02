@@ -26,7 +26,7 @@ transform_train = [
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024) #2048
 
-model = resnet34(pretrained=True)
+model = resnet34(pretrained=False)
 
 # Hyperparamters
 batch_size = 32
@@ -51,7 +51,7 @@ data = Data(
 )
 
 
-start_epoch = 0  # Change me!
+start_epoch = 16  # Change me!
 
 if os.path.exists(
     "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
