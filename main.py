@@ -30,7 +30,7 @@ model = resnet34(pretrained=True)
 
 # Hyperparamters
 batch_size = 32
-no_epoch = 70
+no_epoch = 75
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
 criterion = nn.TripletMarginLoss(
@@ -51,7 +51,7 @@ data = Data(
 )
 
 
-start_epoch = 0  # Change me!
+start_epoch = 50  # Change me!
 
 if os.path.exists(
     "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
@@ -67,5 +67,5 @@ if os.path.exists(
     data.train(no_epoch, model, optimizer, start_epoch=start_epoch + 1)
 else:
     print("No model found for ", model.name)
-    data.train(no_epoch, model, optimizer)
+    data.train(no_epoch, model, optimizer, start_epoch=start_epoch)
 

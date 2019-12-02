@@ -170,8 +170,9 @@ class Data:
         time_list = []
         start_time = time.time()
         losses = []
-        print("Training started")
         for epoch in range(start_epoch, no_epoch):
+            training_q = []
+            classes_q = []
             model.train()
             train_accu = []
             epochLosses = []
@@ -181,8 +182,13 @@ class Data:
                     self.upsample(Variable(im2).to(device)),
                     self.upsample(Variable(im3).to(device)),
                 )
+                print("Running Q model", epoch, batch_idx, end="\r")
                 Q = model(im1)
+                training_q += list(Q.data.cpu().numpy())
+                classes_q += list(c)
+                print("Running P model", epoch, batch_idx, end="\r")
                 P = model(im2)
+                print("Running N model", epoch, batch_idx, end="\r")
                 N = model(im3)
                 loss = self.criterion(Q, P, N)
                 optimizer.zero_grad()
@@ -190,10 +196,10 @@ class Data:
 
                 optimizer.step()
                 epochLosses.append(loss.item())
-            mean_loss = np.mean(epochLosses)
-            print("Loss for epoch", epoch, ":", mean_loss)
-            losses.append(mean_loss)
-
+            l = np.mean(epochLosses)
+            print('Loss for epoch' + str(epoch) + ': ' + str(l))
+            losses.append(l)
+            
             if self.scheduler is not None:
                 self.scheduler.step()
 
@@ -203,18 +209,20 @@ class Data:
                     model.state_dict(),
                     "models/trained_models/temp_{}_{}.pth".format(model.name, epoch),
                 )
-
-                # torch.save(
-                #    optimizer,
-                #    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
+                torch.save(
+                    optimizer,
+                    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
+                )
                 # )
 
         if should_save:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-
-            np.save("losses_{}.npy".format(model.name), losses)
+            np.save('trainEmbeddings{}_{}.npy'.format(model.name, epoch), np.array(training_q))
+            np.save('embeddingClasses{}_{}.npy'.format(model.name, epoch), np.array(classes_q))
+            np.save('Losses{}.npy'.format(model.name), np.array(losses))
+            # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
