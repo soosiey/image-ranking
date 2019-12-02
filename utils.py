@@ -306,6 +306,7 @@ class Data:
         print("Getting top images")
         top_images = []
         for im, im_class, im_idx in images:
+            assert im_class == test_labels[im_idx]
             test = test_embeddings[im_idx]
             test = torch.from_numpy(test).float().to(device)
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
@@ -326,6 +327,7 @@ class Data:
         print("Getting Bottom Images")
         bottom_images = []
         for im, im_class, im_idx in images:
+            assert im_class == test_labels[im_idx]
             test = test_embeddings[im_idx]
             test = torch.from_numpy(test).float().to(device)
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
