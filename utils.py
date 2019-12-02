@@ -261,9 +261,9 @@ class Data:
         tc = 0
         for idx, test in enumerate(test_embeddings):
             test = torch.from_numpy(test).float().to(device)
-            dist = torch.sum((train_embeddings - test).pow(2), dim=1)
+            dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             _, ind = torch.topk(dist, k, largest=False)
-            count = torch.sum(train_labels[ind] == test_labels[idx]).pow(0.5)
+            count = torch.sum(train_labels[ind] == test_labels[idx])
 
             if count.item() > 0:
                 tc += 1
