@@ -24,7 +24,7 @@ def show_figures(images, title):
     #plt.figure(figsize=(8, 10))
     fig = plt.figure(figsize=(10, 10))
     gs = gridspec.GridSpec(5, 11)
-    gs.update(wspace=0.5, hspace=0.5, top=0.4, bottom=0.25, right=0.3, left=0.3)
+    gs.update(wspace=0.5, hspace=0.5, top=0.4, bottom=0.25, right=0.3, left=0.2)
     for idx, val in enumerate(images):
         #plt.subplot(11 / 5 + 1, 5, idx + 1)
         #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
@@ -78,7 +78,7 @@ data = Data(
 )
 
 
-start_epoch = 12  # Change me!
+start_epoch = 16  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")

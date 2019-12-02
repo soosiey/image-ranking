@@ -149,7 +149,7 @@ class Data:
         train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
 
         self.emb_train = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
+            train_dataset, batch_size=batch_size, shuffle=False, num_workers=8
         )
 
         val_dir = os.path.join(data_dir, "val/")
@@ -238,7 +238,7 @@ class Data:
         testing_q = []
         classes_q = []
         print("Creating Train Embeddings")
-        for batch_idx, ((im, _, _), c) in enumerate(self.train_loader):
+        for batch_idx, (im, c) in enumerate(self.emb_train):
             im = self.upsample(Variable(im).to(device))
             val = model(im)
             testing_q += list(val.data.cpu().numpy())
@@ -262,7 +262,7 @@ class Data:
         for idx, test in enumerate(test_embeddings):
             test = torch.from_numpy(test).float().to(device)
             dist = torch.sum((train_embeddings - test).pow(2), dim=1)
-            _, ind = sort_dist = torch.topk(dist, k, largest=False)
+            _, ind = torch.topk(dist, k, largest=False)
             count = torch.sum(train_labels[ind] == test_labels[idx]).pow(0.5)
 
             if count.item() > 0:
@@ -302,7 +302,7 @@ class Data:
             print("Adding", im_class, "to set of images")
             images.append((im, im_class, len_imp * im_class + idx))
 
-        train_data_set = self.train_loader.dataset
+        train_data_set = self.emb_train.dataset
         print("Getting top images")
         top_images = []
         for im, im_class, im_idx in images:
@@ -317,7 +317,7 @@ class Data:
             im = im.transpose(1, 2, 0) 
             top_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, low_dist):
-                (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
+                im1, im_class1 = train_data_set.__getitem__(idx)
                 im1 = im1.data.cpu().numpy()
                 #im1 += 1.0
                 #im1 /= 2.0
@@ -338,7 +338,7 @@ class Data:
             im = im.transpose(1, 2, 0)
             bottom_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, high_dist):
-                (im1, _, _), im_class1 = train_data_set.__getitem__(idx)
+                im1, im_class1 = train_data_set.__getitem__(idx)
                 im1 = im1.data.cpu().numpy()
                 #im1 += 1.0
                 #im1 /= 2.0
