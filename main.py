@@ -37,7 +37,7 @@ criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
 
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=13, gamma=0.1)
 upsample = None  # nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 data = Data(
@@ -51,7 +51,7 @@ data = Data(
 )
 
 
-start_epoch = 16  # Change me!
+start_epoch = 27  # Change me!
 
 if os.path.exists(
     "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)

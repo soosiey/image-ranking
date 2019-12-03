@@ -47,7 +47,7 @@ data = Data(
 )
 
 
-start_epoch = 17  # Change me!
+start_epoch = 27  # Change me!
 
 model.load_state_dict(
     torch.load(

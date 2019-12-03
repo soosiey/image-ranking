@@ -143,13 +143,13 @@ class Data:
         train_dataset = TinyImage(train_dir, transform=transform_train)
 
         self.train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
+            train_dataset, batch_size=batch_size, shuffle=True, num_workers=32
         )
 
         train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
 
         self.emb_train = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=False, num_workers=8
+            train_dataset, batch_size=batch_size, shuffle=False, num_workers=32
         )
 
         val_dir = os.path.join(data_dir, "val/")
