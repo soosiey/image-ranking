@@ -8,7 +8,7 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 import numpy as np
 import random
 import copy
@@ -22,9 +22,9 @@ import os
 
 def show_figures(images, title):
     #plt.figure(figsize=(8, 10))
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(20, 20))
     gs = gridspec.GridSpec(5, 11)
-    gs.update(wspace=0.5, hspace=0.5)
+    gs.update(wspace=0.5, hspace=1.6, right=0.9)
     for idx, val in enumerate(images):
         #plt.subplot(11 / 5 + 1, 5, idx + 1)
         #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
@@ -47,12 +47,15 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
+upsample = None
 
 # model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
 # model._name = "ResNet101"  # resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
-model = resnet18(pretrained=False)
-model.fc = nn.Linear(2048, 1024)  # 2048
+#model = resnet18(pretrained=False)
+#model.fc = nn.Linear(2048, 1024)  # 2048
+#upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+model = resnet34(pretrained=False)
 
 # Hyperparamters
 batch_size = 32
@@ -64,7 +67,6 @@ criterion = nn.TripletMarginLoss(
 )  # Only change the params, do not change the criterion.
 
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
-upsample = None  # nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 data = Data(
     batch_size,
@@ -77,7 +79,7 @@ data = Data(
 )
 
 
-start_epoch = 27  # Change me!
+start_epoch = 17  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")
@@ -95,7 +97,7 @@ train_labels = np.load(
 test_labels = np.load(
     "embeddings/test_labels_{}_{}.npy".format(model.name, start_epoch)
 )
-#print(data.knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels))
+print(data.knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels, k=10))
 top, bottom = data.get_top_and_bottom(
     train_embeddings, test_embeddings, train_labels, test_labels
 )
