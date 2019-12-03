@@ -52,10 +52,10 @@ upsample = None
 # model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
 # model._name = "ResNet101"  # resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
-model = resnet18(pretrained=False)
-model.fc = nn.Linear(2048, 1024)  # 2048
-upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-#model = resnet34(pretrained=False)
+#model = resnet18(pretrained=False)
+#model.fc = nn.Linear(2048, 1024)  # 2048
+#upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+model = resnet34(pretrained=False)
 
 # Hyperparamters
 batch_size = 32
@@ -79,7 +79,7 @@ data = Data(
 )
 
 
-start_epoch = 39  # Change me!
+start_epoch = 17  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")
