@@ -26,11 +26,12 @@ upsample = None
 #upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
-#model._name = "ResNet101"
-model = resnet34(pretrained=False)
+# model._name = "ResNet101"
+# model = resnet34(pretrained=False)
+model = resnet18(pretrained=False)
 
 # Hyperparamters
-batch_size = 64
+batch_size = 32
 no_epoch = 70
 LR = 0.001
 criterion = nn.TripletMarginLoss(
