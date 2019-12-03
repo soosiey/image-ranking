@@ -116,9 +116,10 @@ def resnet18(pretrained=True):
     )
     if pretrained:
         model.load_state_dict(
-            model_zoo.load_url(model_urls["resnet18"], model_dir="~/scratch/HW4_Model")
+            model_zoo.load_url(model_urls["resnet18"], model_dir="~/scratch/resnetModel")
         )
-    model.name = "ResNet18-Torch"
+        model = nn.Sequential(nn.Upsample(scale_factor=3.5, mode='bilinear'), model)
+    model.name = "ResNet18"
     return model
 
 
