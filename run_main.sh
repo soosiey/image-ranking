@@ -1,15 +1,9 @@
 #!/bin/bash
 wd=$(pwd)
 
-while echo $1 | grep -q ^-; do
-    eval $( echo $1 | sed 's/^-//' )=$2
-    shift
-    shift
-done
-
 reqd_cmd="#!/bin/bash
 #PBS -l nodes=1:ppn=9:xk
-#PBS -l walltime=${walltime}
+#PBS -l walltime=00:05:00
 #PBS -N image_ranking_
 #PBS -e \$PBS_JOBID.err
 #PBS -o \$PBS_JOBID.out
@@ -21,7 +15,14 @@ reqd_cmd="#!/bin/bash
 module load python/2.0.0
 #module load cudatoolkit
 cd ${wd}
-aprun -n 1 -N 1 python main_1.py --lr ${lr} --batch_size ${batch_size}"
+aprun -n 1 -N 1 python main_1.py"
+
+while echo $1 | grep -q ^-; do
+    reqd_cmd="${reqd_cmd} -$1 $2"
+    shift
+    shift
+done
+
 echo "${reqd_cmd}" > run_task.pbs
 
 qsub run_task.pbs
