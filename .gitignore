@@ -3,3 +3,8 @@ models/__pycache__/
 models/trained_models/
 embeddings/
 dataset/
+*.err
+*.out
+*.ER
+*.OU
+*.npy
