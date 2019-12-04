@@ -143,13 +143,13 @@ class Data:
         train_dataset = TinyImage(train_dir, transform=transform_train)
 
         self.train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=True, num_workers=8
+            train_dataset, batch_size=batch_size, shuffle=True, num_workers=32
         )
 
         train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
 
         self.emb_train = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=False, num_workers=8
+            train_dataset, batch_size=batch_size, shuffle=False, num_workers=32
         )
 
         val_dir = os.path.join(data_dir, "val/")
@@ -159,7 +159,7 @@ class Data:
 
         val_dataset = TinyImage(val_dir, transform=transform_test, train=False)
         self.val_loader = torch.utils.data.DataLoader(
-            val_dataset, batch_size=batch_size, shuffle=False, num_workers=8
+            val_dataset, batch_size=batch_size, shuffle=False, num_workers=32
         )
 
     def train(self, no_epoch, model, optimizer, start_epoch=0, should_save=True):
@@ -202,24 +202,13 @@ class Data:
                     model.state_dict(),
                     "models/trained_models/temp_{}_{}.pth".format(model.name, epoch),
                 )
-                torch.save(
-                    optimizer,
-                    "models/trained_models/temp_{}_{}.state".format(model.name, epoch),
-                )
-                # )
+
 
         if should_save:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-            np.save(
-                "trainEmbeddings{}_{}.npy".format(model.name, epoch),
-                np.array(training_q),
-            )
-            np.save(
-                "embeddingClasses{}_{}.npy".format(model.name, epoch),
-                np.array(classes_q),
-            )
+
             np.save("Losses{}.npy".format(model.name), np.array(losses))
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
@@ -275,15 +264,7 @@ class Data:
             if count.item() > 0:
                 tc += 1
             accuracies.append(count.item() / float(k))
-        # knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
-        # knn.fit(train_embeddings, train_labels)
-        # predicted_labels = knn.predict_proba(test_embeddings)
-        # accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
-        # accuracies = []
-        # for idx, sample in enumerate(predicted_labels):
-        #    acc = sample[test_labels[idx]]
-        #    print("acc", acc, "label", test_labels[idx])
-        #    accuracies.append(acc)
+
         return np.mean(accuracies), tc / 10000.0
 
     def get_top_and_bottom(
@@ -319,16 +300,14 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             low_dist, ind = torch.topk(dist, k, largest=False)
             im = im.data.cpu().numpy()
-            # im += 1.0
-            # im /= 2.0
+
             im = im.transpose(1, 2, 0)
             top_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, low_dist):
                 im1, im_class1 = train_data_set.__getitem__(idx)
                 assert im_class1 == train_labels[idx]
                 im1 = im1.data.cpu().numpy()
-                # im1 += 1.0
-                # im1 /= 2.0
+
                 im1 = im1.transpose(1, 2, 0)
                 top_images.append((im1, im_class1, d.item()))
                 print("Match for", im_class, "is", im_class1, d.item())
@@ -341,8 +320,7 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             high_dist, ind = torch.topk(dist, k, largest=True)
             im = im.data.cpu().numpy()
-            # im += 1.0
-            # im /= 2.0
+
             im = im.transpose(1, 2, 0)
             bottom_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, high_dist):
@@ -350,23 +328,9 @@ class Data:
                 assert im_class1 == train_labels[idx]
 
                 im1 = im1.data.cpu().numpy()
-                # im1 += 1.0
-                # im1 /= 2.0
+
                 im1 = im1.transpose(1, 2, 0)
                 print("Match for", im_class, "is", im_class1, d.item())
                 bottom_images.append((im1, im_class1, d.item()))
-            # count = torch.sum(train_labels[ind] == test_labels[im_idx])
 
-            # if count.item() > 0:
-            # tc += 1
-            # accuracies.append(count.item()/float(k))
-        # knn = KNeighborsClassifier(n_neighbors = k, algorithm = 'kd_tree')
-        # knn.fit(train_embeddings, train_labels)
-        # predicted_labels = knn.predict_proba(test_embeddings)
-        # accuracy = accuracy_score(y_true = test_labels, y_pred = predicted_labels)
-        # accuracies = []
-        # for idx, sample in enumerate(predicted_labels):
-        #    acc = sample[test_labels[idx]]
-        #    print("acc", acc, "label", test_labels[idx])
-        #    accuracies.append(acc)
         return top_images, bottom_images

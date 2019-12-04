@@ -27,10 +27,12 @@ upsample = None
 
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
 # model._name = "ResNet101"
+
 model = resnet34(pretrained=False)
 
+
 # Hyperparamters
-batch_size = 64
+batch_size = 32
 no_epoch = 70
 LR = 0.001
 criterion = nn.TripletMarginLoss(
@@ -47,7 +49,7 @@ data = Data(
 )
 
 
-start_epoch = 17  # Change me!
+start_epoch = 27  # Change me!
 
 model.load_state_dict(
     torch.load("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch))

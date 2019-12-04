@@ -120,7 +120,7 @@ def resnet18(pretrained=True):
                 model_urls["resnet18"], model_dir="~/scratch/resnetModel"
             )
         )
-        model = nn.Sequential(nn.Upsample(scale_factor=3.5, mode="bilinear"), model)
+
     model.name = "ResNet18"
     return model
 
