@@ -69,4 +69,3 @@ if os.path.exists(
 else:
     print("No model found for ", model.name)
     data.train(no_epoch, model, optimizer)
-

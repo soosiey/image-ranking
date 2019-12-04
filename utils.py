@@ -171,8 +171,6 @@ class Data:
         start_time = time.time()
         losses = []
         for epoch in range(start_epoch, no_epoch):
-            training_q = []
-            classes_q = []
             model.train()
             train_accu = []
             epochLosses = []
@@ -192,9 +190,9 @@ class Data:
                 optimizer.step()
                 epochLosses.append(loss.item())
             mean_loss = np.mean(epochLosses)
-            print('Loss for epoch', epoch, ':', mean_loss)
+            print("Loss for epoch", epoch, ":", mean_loss)
             losses.append(mean_loss)
-            
+
             if self.scheduler is not None:
                 self.scheduler.step()
 
@@ -214,9 +212,15 @@ class Data:
             torch.save(
                 model.state_dict(), "models/trained_models/{}.pth".format(model.name)
             )
-            np.save('trainEmbeddings{}_{}.npy'.format(model.name, epoch), np.array(training_q))
-            np.save('embeddingClasses{}_{}.npy'.format(model.name, epoch), np.array(classes_q))
-            np.save('Losses{}.npy'.format(model.name), np.array(losses))
+            np.save(
+                "trainEmbeddings{}_{}.npy".format(model.name, epoch),
+                np.array(training_q),
+            )
+            np.save(
+                "embeddingClasses{}_{}.npy".format(model.name, epoch),
+                np.array(classes_q),
+            )
+            np.save("Losses{}.npy".format(model.name), np.array(losses))
             # np.save("models/trained_models/{}_{}.npy".format(model.name, epoch), data)
 
     def test(self, model, epoch):
@@ -315,15 +319,16 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             low_dist, ind = torch.topk(dist, k, largest=False)
             im = im.data.cpu().numpy()
-            #im += 1.0
-            #im /= 2.0
-            im = im.transpose(1, 2, 0) 
+            # im += 1.0
+            # im /= 2.0
+            im = im.transpose(1, 2, 0)
             top_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, low_dist):
                 im1, im_class1 = train_data_set.__getitem__(idx)
+                assert im_class1 == train_labels[idx]
                 im1 = im1.data.cpu().numpy()
-                #im1 += 1.0
-                #im1 /= 2.0
+                # im1 += 1.0
+                # im1 /= 2.0
                 im1 = im1.transpose(1, 2, 0)
                 top_images.append((im1, im_class1, d.item()))
                 print("Match for", im_class, "is", im_class1, d.item())
@@ -336,15 +341,17 @@ class Data:
             dist = torch.sum((train_embeddings - test).pow(2), dim=1).pow(0.5)
             high_dist, ind = torch.topk(dist, k, largest=True)
             im = im.data.cpu().numpy()
-            #im += 1.0
-            #im /= 2.0
+            # im += 1.0
+            # im /= 2.0
             im = im.transpose(1, 2, 0)
             bottom_images.append((im, im_class, im_idx))
             for idx, d in zip(ind, high_dist):
                 im1, im_class1 = train_data_set.__getitem__(idx)
+                assert im_class1 == train_labels[idx]
+
                 im1 = im1.data.cpu().numpy()
-                #im1 += 1.0
-                #im1 /= 2.0
+                # im1 += 1.0
+                # im1 /= 2.0
                 im1 = im1.transpose(1, 2, 0)
                 print("Match for", im_class, "is", im_class1, d.item())
                 bottom_images.append((im1, im_class1, d.item()))

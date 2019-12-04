@@ -20,22 +20,23 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 
+
 def show_figures(images, title):
-    #plt.figure(figsize=(8, 10))
+    # plt.figure(figsize=(8, 10))
     fig = plt.figure(figsize=(20, 20))
     gs = gridspec.GridSpec(5, 11)
     gs.update(wspace=0.5, hspace=1.6, right=0.9)
     for idx, val in enumerate(images):
-        #plt.subplot(11 / 5 + 1, 5, idx + 1)
-        #plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
+        # plt.subplot(11 / 5 + 1, 5, idx + 1)
+        # plt.subplots_adjust(top=0.99, bottom=0.01, hspace=1.5, wspace=0.4)
         ax = plt.subplot(gs[idx])
         ax.set_xticklabels([])
         ax.set_yticklabels([])
-        ax.set_aspect('equal')
+        ax.set_aspect("equal")
         im, im_class, im_dist = val
         ax.title.set_text("{} {}".format(im_class, round(im_dist, 2)))
         plt.imshow(im)
-    #plt.tight_layout()
+    # plt.tight_layout()
     plt.savefig(title)
 
 
@@ -52,9 +53,9 @@ upsample = None
 # model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
 # model._name = "ResNet101"  # resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
-#model = resnet18(pretrained=False)
-#model.fc = nn.Linear(2048, 1024)  # 2048
-#upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+# model = resnet18(pretrained=False)
+# model.fc = nn.Linear(2048, 1024)  # 2048
+# upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 model = resnet34(pretrained=False)
 
 # Hyperparamters
@@ -85,19 +86,19 @@ if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch
     print("Please test your model first then graph it!")
     exit()
 
-train_embeddings = np.load(
-    "embeddings/train_{}_{}.npy".format(model.name, start_epoch)
-)
-test_embeddings = np.load(
-    "embeddings/test_{}_{}.npy".format(model.name, start_epoch)
-)
+train_embeddings = np.load("embeddings/train_{}_{}.npy".format(model.name, start_epoch))
+test_embeddings = np.load("embeddings/test_{}_{}.npy".format(model.name, start_epoch))
 train_labels = np.load(
     "embeddings/train_labels_{}_{}.npy".format(model.name, start_epoch)
 )
 test_labels = np.load(
     "embeddings/test_labels_{}_{}.npy".format(model.name, start_epoch)
 )
-print(data.knn_accuracy(train_embeddings, test_embeddings, train_labels, test_labels, k=10))
+print(
+    data.knn_accuracy(
+        train_embeddings, test_embeddings, train_labels, test_labels, k=10
+    )
+)
 top, bottom = data.get_top_and_bottom(
     train_embeddings, test_embeddings, train_labels, test_labels
 )
