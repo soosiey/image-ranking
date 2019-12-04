@@ -12,8 +12,15 @@ import argparse
 from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--lr', type=float, default=0.001, help='# training iterations')
+parser.add_argument('--lr', type=float, default=0.001)
 parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--no_epoch', type=int, default=75)
+parser.add_argument('--momentum', type=float, default=0.9)
+parser.add_argument('--weight_decay', type=float, default=1e-5)
+parser.add_argument('--margin', type=float, default=1.0)
+parser.add_argument('--step_size', type=int, default=13)
+parser.add_argument('--gamma', type=float, default=0.1)
+parser.add_argument('--start_epoch', type=int, default=27)
 args = parser.parse_args()
 
 transform_test = [transforms.ToTensor()]
@@ -35,14 +42,14 @@ model = resnet34(pretrained=False)
 
 # Hyperparamters
 # batch_size = 32
-no_epoch = 75
+# no_epoch = 75
 # LR = 0.001
-optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=1e-5)
+optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 criterion = nn.TripletMarginLoss(
-    margin=1.0
+    margin=args.margin
 )  # Only change the params, do not change the criterion.
 
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=13, gamma=0.1)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
 upsample = None  # nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
 
 data = Data(
@@ -56,21 +63,21 @@ data = Data(
 )
 
 
-start_epoch = 27  # Change me!
+# start_epoch = 27  # Change me!
 
 
 if os.path.exists(
-    "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
+    "models/trained_models/temp_{}_{}.pth".format(model.name, args.start_epoch)
 ):
     print("found model", model.name)
     model.load_state_dict(
         torch.load(
-            "models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch)
+            "models/trained_models/temp_{}_{}.pth".format(model.name, args.start_epoch)
         )
         # data.test(model)
     )
     # data.test(model)
-    data.train(no_epoch, model, optimizer, start_epoch=start_epoch + 1)
+    data.train(args.no_epoch, model, optimizer, start_epoch=args.start_epoch + 1)
 else:
     print("No model found for ", model.name)
-    data.train(no_epoch, model, optimizer)
+    data.train(args.no_epoch, model, optimizer)
