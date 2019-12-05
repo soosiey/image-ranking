@@ -9,7 +9,7 @@ from utils import Data
 import numpy as np
 import argparse
 
-from models.resnet import resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34, resnet101
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', type=float, default=0.001)
@@ -38,7 +38,10 @@ transform_train = [
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024) #2048
 
-model = resnet34(pretrained=False)
+# model = resnet34(pretrained=False)
+
+model = resnet101(pretrained=True)
+model.fc = nn.Linear(2048, 4096)
 
 # Hyperparamters
 # batch_size = 32
