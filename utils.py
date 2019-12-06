@@ -170,10 +170,12 @@ class Data:
         time_list = []
         start_time = time.time()
         losses = []
+        print('Started training')
         for epoch in range(start_epoch, no_epoch):
             model.train()
             train_accu = []
             epochLosses = []
+            print('Epoch', epoch)
             for batch_idx, ((im1, im2, im3), c) in enumerate(self.train_loader):
                 im1, im2, im3 = (
                     self.upsample(Variable(im1).to(device)),

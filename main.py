@@ -31,7 +31,7 @@ transform_train = [
 model = resnet101(pretrained=True)
 
 # Hyperparamters
-batch_size = 8
+batch_size = 10
 no_epoch = 50
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
