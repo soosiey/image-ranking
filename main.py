@@ -8,7 +8,7 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet101, resnet18, ResNet, BasicBlock, resnet34
 
 
 transform_test = [transforms.ToTensor()]
