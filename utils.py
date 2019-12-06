@@ -54,7 +54,7 @@ class TinyImage(Dataset):
         root_dir,
         *args,
         train=True,
-        num_classes=200,
+        num_classes=4096,
         transform=None,
         loader=pil_loader,
         **kwargs

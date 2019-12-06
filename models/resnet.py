@@ -128,7 +128,7 @@ def resnet18(pretrained=True):
 def resnet101(pretrained=True):
     # model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
     model = torchvision.models.resnet.ResNet(
-        torchvision.models.resnet.BasicBlock, [3, 4, 23, 3]
+        torchvision.models.resnet.Bottleneck, [3, 4, 23, 3]
     )
     if pretrained:
         model.load_state_dict(
