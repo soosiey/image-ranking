@@ -14,7 +14,7 @@ from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 transform_test = [transforms.ToTensor()]
 
 transform_train = [
-    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
+    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     transforms.RandomCrop(64, padding=4),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
