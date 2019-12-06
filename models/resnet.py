@@ -134,6 +134,7 @@ def resnet101(pretrained=True):
         model.load_state_dict(
             model_zoo.load_url(model_urls["resnet101"], model_dir="~/scratch/HW4_Model")
         )
+    model = nn.Sequential(model, nn.Linear(1000,4096))
     model.name = "ResNet101-Torch"
     return model
 

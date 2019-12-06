@@ -54,7 +54,7 @@ class TinyImage(Dataset):
         root_dir,
         *args,
         train=True,
-        num_classes=4096,
+        num_classes=200,
         transform=None,
         loader=pil_loader,
         **kwargs
@@ -143,13 +143,13 @@ class Data:
         train_dataset = TinyImage(train_dir, transform=transform_train)
 
         self.train_loader = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=True, num_workers=16
+            train_dataset, batch_size=batch_size, shuffle=True, num_workers=32
         )
 
         train_dataset = TinyImage(train_dir, transform=transform_train, train=False)
 
         self.emb_train = torch.utils.data.DataLoader(
-            train_dataset, batch_size=batch_size, shuffle=False, num_workers=16
+            train_dataset, batch_size=batch_size, shuffle=False, num_workers=32
         )
 
         val_dir = os.path.join(data_dir, "val/")
@@ -159,7 +159,7 @@ class Data:
 
         val_dataset = TinyImage(val_dir, transform=transform_test, train=False)
         self.val_loader = torch.utils.data.DataLoader(
-            val_dataset, batch_size=batch_size, shuffle=False, num_workers=16
+            val_dataset, batch_size=batch_size, shuffle=False, num_workers=32
         )
 
     def train(self, no_epoch, model, optimizer, start_epoch=0, should_save=True):

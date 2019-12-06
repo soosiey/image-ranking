@@ -11,13 +11,14 @@ import numpy as np
 from models.resnet import resnet101, resnet18, ResNet, BasicBlock, resnet34
 
 
-transform_test = [transforms.ToTensor()]
+transform_test = [transforms.ToTensor(),
+                  transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
 
 transform_train = [
-    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
     transforms.RandomCrop(64, padding=4),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
+    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
 ]
 
 
@@ -30,7 +31,7 @@ transform_train = [
 model = resnet101(pretrained=True)
 
 # Hyperparamters
-batch_size = 16
+batch_size = 8
 no_epoch = 50
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
