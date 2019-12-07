@@ -15,7 +15,7 @@ reqd_cmd="#!/bin/bash
 module load python/2.0.0
 #module load cudatoolkit
 cd ${wd}
-aprun -n 1 -N 1 python main_1.py"
+aprun -n 1 -N 1 python main.py"
 
 while echo $1 | grep -q ^-; do
     reqd_cmd="${reqd_cmd} -$1 $2"
