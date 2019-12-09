@@ -3,7 +3,7 @@ wd=$(pwd)
 
 reqd_cmd="#!/bin/bash
 #PBS -l nodes=1:ppn=9:xk
-#PBS -l walltime=00:05:00
+#PBS -l walltime=40:00:00
 #PBS -N image_ranking_
 #PBS -e \$PBS_JOBID.err
 #PBS -o \$PBS_JOBID.out

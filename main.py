@@ -2,6 +2,7 @@
 import os
 import torch
 import torch.utils.data
+import argparse
 import torchvision.transforms as transforms
 import torch.optim as optim
 import torch.nn as nn
@@ -22,6 +23,7 @@ parser.add_argument('--step_size', type=int, default=13)
 parser.add_argument('--gamma', type=float, default=0.1)
 parser.add_argument('--start_epoch', type=int, default=0)
 args = parser.parse_args()
+print(args)
 
 transform_test = [transforms.ToTensor(),
                   transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
