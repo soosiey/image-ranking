@@ -91,7 +91,7 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size,
 data = Data(
     batch_size,
     criterion,
-    "../data/tiny-imagenet-200/",
+    "../../data/tiny-imagenet-200/",
     upsample=upsample,
     scheduler=scheduler,
     transform_train=transform_train,

@@ -67,7 +67,7 @@ criterion = nn.TripletMarginLoss(
 data = Data(
     batch_size,
     criterion,
-    "../data/tiny-imagenet-200/",
+    "../../data/tiny-imagenet-200/",
     upsample=upsample,
     transform_train=transform_train,
     transform_test=transform_test,

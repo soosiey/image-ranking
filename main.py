@@ -68,7 +68,7 @@ upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 data = Data(
     args.batch_size,
     criterion,
-    "../data/tiny-imagenet-200/",
+    "../../data/tiny-imagenet-200/",
     upsample=upsample,
     scheduler=scheduler,
     transform_train=transform_train,
