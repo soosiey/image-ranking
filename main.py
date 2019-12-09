@@ -22,6 +22,7 @@ parser.add_argument('--margin', type=float, default=1.0)
 parser.add_argument('--step_size', type=int, default=13)
 parser.add_argument('--gamma', type=float, default=0.1)
 parser.add_argument('--start_epoch', type=int, default=0)
+parser.add_argument('--out_features', type=int, default=2048)
 args = parser.parse_args()
 print(args)
 
@@ -42,9 +43,15 @@ if args.resnet == 0:
     model.fc = nn.Linear(model.fc.in_features, 200)
 elif args.resnet == 18:
     model = resnet18(pretrained=False)
-    # model.fc = nn.Linear(2048, 1024) #2048
+    model.fc = nn.Linear(in_features = 512, out_features = args.out_features)
+elif args.resnet == 34:
+    model = resnet34(pretrained=False)
+    print(model)
+    model.fc = nn.Linear(in_features = 2048, out_features = args.out_features)
 elif args.resnet == 101:
     model = resnet101(pretrained=True)
+    model.fc = nn.Linear(in_features = 2048, out_features = args.out_features) #2048
+
 
 # Hyperparamters
 # batch_size = 10
