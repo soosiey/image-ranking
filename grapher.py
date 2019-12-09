@@ -56,7 +56,7 @@ upsample = None
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024)  # 2048
 # upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-model = resnet34(pretrained=False)
+model = resnet18(pretrained=False)
 
 # Hyperparamters
 batch_size = 32
@@ -80,7 +80,7 @@ data = Data(
 )
 
 
-start_epoch = 17  # Change me!
+start_epoch = 24  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")

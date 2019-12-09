@@ -11,14 +11,16 @@ import numpy as np
 from models.resnet import resnet18, ResNet, BasicBlock, resnet34
 
 
-transform_test = [transforms.ToTensor()]
+transform_test = [transforms.ToTensor(),
+                  transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
 
 transform_train = [
-    transforms.RandomCrop(64, padding=4),
-    transforms.RandomHorizontalFlip(),
+    #transforms.RandomCrop(64, padding=4),
+    #transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
+    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
 ]
-upsample = None
+upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 # model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
 # model = resnet18(pretrained=False)
@@ -28,7 +30,7 @@ upsample = None
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
 # model._name = "ResNet101"
 
-model = resnet34(pretrained=False)
+model = resnet18(pretrained=False)
 
 
 # Hyperparamters
@@ -49,7 +51,7 @@ data = Data(
 )
 
 
-start_epoch = 27  # Change me!
+start_epoch = 25  # Change me!
 
 model.load_state_dict(
     torch.load("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch))
