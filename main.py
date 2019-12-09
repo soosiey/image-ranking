@@ -44,13 +44,16 @@ if args.resnet == 0:
 elif args.resnet == 18:
     model = resnet18(pretrained=False)
     model.fc = nn.Linear(in_features = 512, out_features = args.out_features)
+    upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 elif args.resnet == 34:
     model = resnet34(pretrained=False)
     print(model)
     model.fc = nn.Linear(in_features = 2048, out_features = args.out_features)
+    upsample = None
 elif args.resnet == 101:
     model = resnet101(pretrained=True)
     model.fc = nn.Linear(in_features = 2048, out_features = args.out_features) #2048
+    upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 
 
 # Hyperparamters
@@ -63,7 +66,6 @@ criterion = nn.TripletMarginLoss(
 )  # Only change the params, do not change the criterion.
 
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
-upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 
 data = Data(
     args.batch_size,
