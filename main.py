@@ -42,7 +42,7 @@ if args.resnet == 0:
     model.fc = nn.Linear(model.fc.in_features, 200)
 elif args.resnet == 18:
     model = resnet18(pretrained=False)
-    model.fc = nn.Linear(2048, 1024) #2048
+    # model.fc = nn.Linear(2048, 1024) #2048
 elif args.resnet == 101:
     model = resnet101(pretrained=True)
 

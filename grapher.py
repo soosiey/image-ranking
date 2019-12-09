@@ -19,7 +19,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--resnet', type=int, default=18)
+parser.add_argument('--num_classes', type=int, default=200)
+parser.add_argument('--lr', type=float, default=0.001)
+parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--no_epoch', type=int, default=75)
+parser.add_argument('--momentum', type=float, default=0.9)
+parser.add_argument('--weight_decay', type=float, default=1e-5)
+parser.add_argument('--margin', type=float, default=1.0)
+parser.add_argument('--step_size', type=int, default=13)
+parser.add_argument('--gamma', type=float, default=0.1)
+parser.add_argument('--start_epoch', type=int, default=0)
 
 def show_figures(images, title):
     # plt.figure(figsize=(8, 10))
@@ -48,26 +61,32 @@ transform_train = [
     transforms.ToTensor(),
 ]
 
-upsample = None
-
 # model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
 # model._name = "ResNet101"  # resnet18(pretrained=True)
 # model.fc = nn.Linear(model.fc.in_features, 200)
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024)  # 2048
-# upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-model = resnet34(pretrained=False)
+
+if args.resnet == 18:
+    model = resnet18(pretrained=False)
+    upsample = None
+elif args.resnet == 34:
+    upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+    model = resnet34(pretrained=False)
+elif args.resnet == 101:
+    upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
+    model = resnet101(pretrained=False)
 
 # Hyperparamters
-batch_size = 32
-no_epoch = 70
-LR = 0.001
-optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
+batch_size = args.batch_size
+no_epoch = args.no_epoch
+LR = args.lr
+optimizer = optim.SGD(model.parameters(), lr=LR, momentum=args.momentum, weight_decay=args.weight_decay)
 criterion = nn.TripletMarginLoss(
-    margin=1.0
+    margin=args.margin
 )  # Only change the params, do not change the criterion.
 
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.5)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
 
 data = Data(
     batch_size,
@@ -80,7 +99,7 @@ data = Data(
 )
 
 
-start_epoch = 17  # Change me!
+start_epoch = args.start_epoch  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")
