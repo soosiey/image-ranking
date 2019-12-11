@@ -29,8 +29,8 @@ model = resnet50(pretrained=True)
 
 # Hyperparamters
 batch_size = 10
-no_epoch = 20
-LR = 0.00005
+no_epoch = 10
+LR = 0.0001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
 criterion = nn.TripletMarginLoss(
     margin=1.0
@@ -50,7 +50,7 @@ data = Data(
 )
 
 
-start_epoch = 4 # Change me!
+start_epoch = 0 # Change me!
 
 
 if os.path.exists(
