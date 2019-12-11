@@ -124,6 +124,20 @@ def resnet18(pretrained=True):
     model.name = "ResNet18"
     return model
 
+def resnet50(pretrained=True):
+    # model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
+    model = torchvision.models.resnet.ResNet(
+        torchvision.models.resnet.Bottleneck, [3, 4, 6, 3]
+    )
+    if pretrained:
+        model.load_state_dict(
+            model_zoo.load_url(
+                model_urls["resnet50"], model_dir="~/scratch/resnetModel"
+            )
+        )
+
+    model.name = "ResNet50"
+    return model
 
 def resnet101(pretrained=True):
     # model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])

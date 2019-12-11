@@ -8,7 +8,7 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34, resnet50
 import numpy as np
 import random
 import copy
@@ -43,12 +43,12 @@ def show_figures(images, title):
 transform_test = [transforms.ToTensor()]
 
 transform_train = [
-    transforms.RandomCrop(64, padding=4),
-    transforms.RandomHorizontalFlip(),
+    #transforms.RandomCrop(64, padding=4),
+    #transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
 ]
 
-upsample = None
+upsample = nn.Upsample(scale_factor=3.5, mode='bilinear')
 
 # model = ResNet(BasicBlock, [3, 4, 23, 3], num_classes=1000)
 # model._name = "ResNet101"  # resnet18(pretrained=True)
@@ -56,10 +56,10 @@ upsample = None
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024)  # 2048
 # upsample = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=True)
-model = resnet18(pretrained=False)
+model = resnet50(pretrained=False)
 
 # Hyperparamters
-batch_size = 32
+batch_size = 10
 no_epoch = 70
 LR = 0.001
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
@@ -80,7 +80,7 @@ data = Data(
 )
 
 
-start_epoch = 24  # Change me!
+start_epoch = 3  # Change me!
 
 if not os.path.exists("embeddings/test_{}_{}.npy".format(model.name, start_epoch)):
     print("Please test your model first then graph it!")

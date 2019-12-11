@@ -8,18 +8,15 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet101, resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet101, resnet18, ResNet, BasicBlock, resnet34, resnet50
 
 
-transform_test = [transforms.ToTensor(),
-                  transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
+transform_test = [transforms.ToTensor()]
 
 transform_train = [
     transforms.RandomCrop(64, padding=4),
     transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
-]
+    transforms.ToTensor()]
 
 
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
@@ -28,19 +25,19 @@ transform_train = [
 # model = resnet18(pretrained=False)
 # model.fc = nn.Linear(2048, 1024) #2048
 
-model = resnet18(pretrained=True)
+model = resnet50(pretrained=True)
 
 # Hyperparamters
-batch_size = 32
-no_epoch = 50
-LR = 0.001
+batch_size = 10
+no_epoch = 20
+LR = 0.00005
 optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.9, weight_decay=1e-5)
 criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
 
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+upsample = nn.Upsample(scale_factor=3.5, mode='bilinear')
 
 data = Data(
     batch_size,
@@ -53,7 +50,7 @@ data = Data(
 )
 
 
-start_epoch = 0 # Change me!
+start_epoch = 4 # Change me!
 
 
 if os.path.exists(

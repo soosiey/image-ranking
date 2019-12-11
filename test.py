@@ -8,17 +8,15 @@ import torch.nn as nn
 from utils import Data
 import numpy as np
 
-from models.resnet import resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34, resnet50
 
 
-transform_test = [transforms.ToTensor(),
-                  transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
+transform_test = [transforms.ToTensor()]
 
 transform_train = [
     #transforms.RandomCrop(64, padding=4),
     #transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
+    transforms.ToTensor()
 ]
 upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 # model = ResNet(BasicBlock, [2,4,4,2], num_classes=200)#resnet18(pretrained=True)
@@ -30,11 +28,11 @@ upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
 # model._name = "ResNet101"
 
-model = resnet18(pretrained=False)
+model = resnet50(pretrained=False)
 
 
 # Hyperparamters
-batch_size = 32
+batch_size = 10
 no_epoch = 70
 LR = 0.001
 criterion = nn.TripletMarginLoss(
@@ -51,7 +49,7 @@ data = Data(
 )
 
 
-start_epoch = 25  # Change me!
+start_epoch = 4  # Change me!
 
 model.load_state_dict(
     torch.load("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch))
