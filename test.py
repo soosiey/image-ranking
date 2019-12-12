@@ -9,7 +9,7 @@ from utils import Data
 import numpy as np
 import argparse
 
-from models.resnet import resnet18, ResNet, BasicBlock, resnet34
+from models.resnet import resnet18, ResNet, BasicBlock, resnet34, resnet101
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--resnet', type=int, default=18)
@@ -23,7 +23,9 @@ parser.add_argument('--margin', type=float, default=1.0)
 # parser.add_argument('--step_size', type=int, default=13)
 # parser.add_argument('--gamma', type=float, default=0.1)
 parser.add_argument('--start_epoch', type=int, default=0)
-
+parser.add_argument('--out_features', type=int, default=4096)
+args = parser.parse_args()
+print(args)
 
 transform_test = [transforms.ToTensor()]
 
@@ -42,17 +44,18 @@ transform_train = [
 # model = ResNet(BasicBlock, [3,4,23,3], num_classes=1000)
 # model._name = "ResNet101"
 
-if args.resenet == 0:
+if args.resnet == 0:
     model = ResNet(BasicBlock, [2,4,4,2], num_classes=args.num_classes)
     upsample = None
-elif args.resenet == 18:
+elif args.resnet == 18:
     model = resnet18(pretrained=False)
     upsample = None
-elif args.resenet == 34:
+elif args.resnet == 34:
     model = resnet34(pretrained=False)
     upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
-elif args.resenet == 101:
+elif args.resnet == 101:
     model = resnet101(pretrained=False)
+    model.fc = nn.Linear(in_features = 2048, out_features = args.out_features) #2048
     upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 
 
