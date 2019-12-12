@@ -26,7 +26,7 @@ transform_train = [
 # model.fc = nn.Linear(2048, 1024) #2048
 
 model = resnet50(pretrained=True)
-
+model.fc = nn.Linear(2048,2048)
 # Hyperparamters
 batch_size = 10
 no_epoch = 10
@@ -36,7 +36,7 @@ criterion = nn.TripletMarginLoss(
     margin=1.0
 )  # Only change the params, do not change the criterion.
 
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
 upsample = nn.Upsample(scale_factor=3.5, mode='bilinear')
 
 data = Data(

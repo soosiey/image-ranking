@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 import os
-import tqdm
+#import tqdm
 import torch
 import torch.utils.data
 from torch.utils.data import Dataset, DataLoader
@@ -177,7 +177,7 @@ class Data:
             train_accu = []
             epochLosses = []
             print('Epoch', epoch)
-            for ((im1, im2, im3), c) in tqdm.tqdm(self.train_loader):
+            for ((im1, im2, im3), c) in self.train_loader: #tqdm.tqdm(self.train_loader):
                 im1, im2, im3 = (
                     self.upsample(Variable(im1).to(device)),
                     self.upsample(Variable(im2).to(device)),

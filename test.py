@@ -29,7 +29,7 @@ upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
 # model._name = "ResNet101"
 
 model = resnet50(pretrained=False)
-
+model.fc = nn.Linear(2048,2048)
 
 # Hyperparamters
 batch_size = 10
@@ -49,7 +49,7 @@ data = Data(
 )
 
 
-start_epoch = 4  # Change me!
+start_epoch = 9  # Change me!
 
 model.load_state_dict(
     torch.load("models/trained_models/temp_{}_{}.pth".format(model.name, start_epoch))
