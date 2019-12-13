@@ -1,0 +1,49 @@
+----------------------------------------
+Begin Torque Prologue on nid27558
+at Wed Dec 11 16:06:41 CST 2019
+Job Id:			10697008.bw
+Username:		tra284
+Group:			TRAIN_bayw
+Job name:		train101
+Requested resources:	nodes=01:ppn=16:xk,walltime=40:00:00,neednodes=01:ppn=16:xk
+Queue:			normal
+Account:		bayw
+End Torque Prologue:  0.118 elapsed
+----------------------------------------
+
+
+
+
+No model found for  ResNet50
+Started training
+Epoch 0
+Loss for epoch 0 : 0.19791451134186586
+Saving Model
+Epoch 1
+Loss for epoch 1 : 0.1292885516697206
+Saving Model
+Epoch 2
+Loss for epoch 2 : 0.1090187704943919
+Saving Model
+Epoch 3
+Loss for epoch 3 : 0.09839242950222542
+Saving Model
+Epoch 4
+Loss for epoch 4 : 0.086583323627253
+Saving Model
+Epoch 5
+Loss for epoch 5 : 0.08066647387566626
+Saving Model
+Epoch 6
+Loss for epoch 6 : 0.07680718252551423
+Saving Model
+Epoch 7
+Loss for epoch 7 : 0.0724296351834595
+Saving Model
+Epoch 8
+Loss for epoch 8 : 0.07041338867499544
+Saving Model
+Epoch 9
+Loss for epoch 9 : 0.06975544462429925
+Saving Model
+Application 83028875 resources: utime ~77411s, stime ~8618s, Rss ~1689484, inblocks ~12562581, outblocks ~3235280
