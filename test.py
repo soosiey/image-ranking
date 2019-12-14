@@ -52,7 +52,8 @@ elif args.resnet == 18:
     upsample = None
 elif args.resnet == 34:
     model = resnet34(pretrained=False)
-    upsample = nn.Upsample(scale_factor=3.5, mode='bilinear', align_corners=True)
+    upsample = None
+    model.fc = nn.Linear(in_features = 2048, out_features = args.out_features)
 elif args.resnet == 101:
     model = resnet101(pretrained=False)
     model.fc = nn.Linear(in_features = 2048, out_features = args.out_features) #2048

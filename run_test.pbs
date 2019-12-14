@@ -11,5 +11,5 @@
 #. /opt/modules/default/init/bash
 module load python/2.0.0
 #module load cudatoolkit
-cd ~/scratch/101_2/image_ranking/
-aprun -n 1 -N 1 python test.py --start_epoch 8 --resnet 101 --batch_size 8
+cd ~/scratch/34_1/image_ranking/
+aprun -n 1 -N 1 python test.py --start_epoch 11 --resnet 34 --batch_size 12
