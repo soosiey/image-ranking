@@ -3,6 +3,8 @@
 
 ## Instructions to run
 
+The dataset for TinyImageNet must first be placed in a folder labeled 'data' outside of the repo. If the repo is cloned, then '../data/' must contain the dataset.
+
 In main.py, change the model to a desired model, or use resnet50 as we have defaulted to. Then, simply run main.py to get a trained model saved to models/trained_models.
 The last epoch, which is epoch 9, will have the final model.
 
@@ -13,4 +15,4 @@ with two numbers, (ex. (0.xxxx, 0.xxxx)). The first number in this tuple is the 
 Finally, to get the top and bottom images, run grapher.py. Make sure that the model and start_epoch variables are the same as the previous steps. The images will be saved to a folder labeled 'images'.
 
 
-
+To run everything as default, for example, you can simply run main.py, test.py, and grapher.py as is.
