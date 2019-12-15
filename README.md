@@ -12,3 +12,5 @@ with two numbers, (ex. (0.xxxx, 0.xxxx)). The first number in this tuple is the 
 
 Finally, to get the top and bottom images, run grapher.py. Make sure that the model and start_epoch variables are the same as the previous steps. The images will be saved to a folder labeled 'images'.
 
+
+
