@@ -16,3 +16,7 @@ Finally, to get the top and bottom images, run grapher.py. Make sure that the mo
 
 
 To run everything as default, for example, you can simply run main.py, test.py, and grapher.py as is.
+
+The utils.py file contains the Data class, custom dataloader, and all the functions used for training, obtaining embeddings, getting accuracies, and getting the top and bottom images.
+
+val_precision.py and similarity_precision.py get the precisions for the datasets using the final model. Again, make sure the model is saved to models/trained_models after running main.py.
