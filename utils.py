@@ -139,6 +139,8 @@ class Data:
         transform_train = transforms.Compose(transform_train)
 
         transform_test = transforms.Compose(transform_test)
+        self.data_dir = data_dir
+        self.transform_test = transform_test
 
         train_dir = os.path.join(data_dir, "train/")
         train_dataset = TinyImage(train_dir, transform=transform_train)
@@ -337,3 +339,44 @@ class Data:
                 bottom_images.append((im1, im_class1, d.item()))
 
         return top_images, bottom_images
+
+    def similarity_precision(self, model, train=True):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model = model.to(device)
+        correct = 0
+        total = 0
+        model.eval()
+        if train:
+            data_loader = self.train_loader
+        else:
+            val_dir = os.path.join(self.data_dir, "val/images/")
+            val_dataset = TinyImage(val_dir, transform=self.transform_test, train = True)
+            data_loader = torch.utils.data.DataLoader(
+                val_dataset, batch_size=self.batch_size, shuffle=True, num_workers=8
+            )
+        for ((im1, im2, im3), c) in data_loader:
+            im1, im2, im3 = (
+                self.upsample(Variable(im1).to(device)),
+                self.upsample(Variable(im2).to(device)),
+                self.upsample(Variable(im3).to(device)),
+            )
+            Q = model(im1)
+            P = model(im2)
+            N = model(im3)
+            # Q = Q.reshape((2048, ))
+            # P = P.reshape((2048, ))
+            # N = N.reshape((2048, ))
+            # Q_N_sq = torch.sum((Q - N)**2)
+            # Q_P_sq = torch.sum((Q - P)**2)
+            # if Q_N_sq.item() > Q_P_sq.item():
+            #     correct += 1
+            loss = self.criterion(Q, P, N)
+            if loss.item() == 0:
+                correct += 1
+            total += 1
+            if total%100 == 0:
+                print("The current total is: ", total)
+                print("The current correct is: ", correct)
+
+        sim_precision = correct/total
+        return sim_precision

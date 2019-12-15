@@ -6,4 +6,5 @@ dataset/
 *.ER
 *.OU
 ~/*
+models/*
 *.npy
