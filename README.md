@@ -20,3 +20,12 @@ To run everything as default, for example, you can simply run main.py, test.py, 
 The utils.py file contains the Data class, custom dataloader, and all the functions used for training, obtaining embeddings, getting accuracies, and getting the top and bottom images.
 
 val_precision.py and similarity_precision.py get the precisions for the datasets using the final model. Again, make sure the model is saved to models/trained_models after running main.py.
+
+
+The Final_Report.pdf shows an analysis of the net, as well as an example output.
+
+The following is also an example output, showing 5 classes (first column), and the images that were ranked most similar to them in the row.
+
+![alt text][logo]
+
+[logo]: ./images/top_images.png "Logo Title Text 2"
